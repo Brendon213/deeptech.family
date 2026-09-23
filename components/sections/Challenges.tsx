@@ -1,36 +1,35 @@
-import NetworkBackground from "@/components/NetworkBackground";
+"use client";
 
-const items = [
-  "Схлопывание окна возможностей",
-  "Долина смерти коммерциализации",
-  "Бесконечный цикл пилотов",
-  "Дефицит инженерной скорости",
-];
+import Icon from "@/components/Icon";
+import { useLanguage } from "@/components/LanguageProvider";
+
+const icons = ["timer", "trending-down", "circle-dashed", "gauge"] as const;
 
 export default function Challenges() {
+  const { t } = useLanguage();
+
   return (
-    <section className="section challenges-section" id="requests">
-      <NetworkBackground />
+    <section className="section" id="requests">
+      <div className="container">
+        <div className="section-heading">
+          <p className="eyebrow">{t.challenges.eyebrow}</p>
+          <h2>
+            {t.challenges.titleLead}
+            <br />
+            <span className="text-gradient">{t.challenges.titleAccent}</span>
+          </h2>
+          <p className="section-lead">{t.challenges.lead}</p>
+        </div>
 
-      <div className="container challenges-content">
-        <p className="eyebrow challenges-eyebrow">Вызовы коммерциализации</p>
-        <h2>
-          Технологическое преимущество
-          <span> перестало быть устойчивым</span>
-        </h2>
-        <p className="challenges-lead">
-          Четыре ключевых барьера, которые разрушают инновации на пути от
-          лаборатории к рынку
-        </p>
-
-        <div className="card-grid challenges-grid">
-          {items.map((item) => (
-            <article className="info-card challenge-card" key={item}>
-              <h3>{item}</h3>
-              <p>
-                Описание блока будет перенесено из текущей версии сайта на этапе
-                точного воспроизведения.
-              </p>
+        <div className="challenge-grid">
+          {t.challenges.items.map(([metric, title, description], index) => (
+            <article className="glass-panel challenge-card" key={title}>
+              <div className="card-topline">
+                <span className="icon-tile"><Icon name={icons[index]} size={20} /></span>
+                <span className="metric-pill">{metric}</span>
+              </div>
+              <h3>{title}</h3>
+              <p>{description}</p>
             </article>
           ))}
         </div>

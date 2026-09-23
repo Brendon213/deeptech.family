@@ -1,24 +1,29 @@
-const modules = [
-  "Клуб фаундеров",
-  "Хаб талантов",
-  "Академия",
-  "Инвестиции",
-  "Медиа",
-  "Go-To-Market",
-];
+"use client";
+
+import Icon from "@/components/Icon";
+import { useLanguage } from "@/components/LanguageProvider";
+
+const icons = ["target", "users", "graduation-cap", "landmark", "radio", "trending-up"] as const;
 
 export default function Ecosystem() {
+  const { t } = useLanguage();
+
   return (
     <section className="section" id="projects">
       <div className="container">
-        <p className="eyebrow">Экосистема</p>
-        <h2>6 модулей для развития технологических проектов</h2>
+        <div className="section-heading centered">
+          <p className="eyebrow">{t.ecosystem.eyebrow}</p>
+          <h2>{t.ecosystem.title}</h2>
+          <p className="section-lead">{t.ecosystem.lead}</p>
+        </div>
 
-        <div className="card-grid">
-          {modules.map((module) => (
-            <article className="info-card" key={module}>
-              <h3>{module}</h3>
-              <p>Контент блока будет перенесён из текущей версии сайта.</p>
+        <div className="module-grid">
+          {t.ecosystem.modules.map(([title, category, description], index) => (
+            <article className="glass-panel module-card" key={title}>
+              <span className="icon-tile module-icon"><Icon name={icons[index]} size={22} /></span>
+              <h3>{title}</h3>
+              <p className="module-category">{category}</p>
+              <p>{description}</p>
             </article>
           ))}
         </div>

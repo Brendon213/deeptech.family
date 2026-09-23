@@ -18,6 +18,10 @@ type PointerState = {
   active: boolean;
 };
 
+const CYAN = "0, 212, 255";
+const MAGNET_RADIUS = 215;
+const CLUSTER_LINK_DISTANCE = 155;
+
 export default function GraphNetwork() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -53,7 +57,6 @@ export default function GraphNetwork() {
       canvas.height = Math.round(height * ratio);
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
-
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
 
       let seed = 0x6d2b79f5;
@@ -63,24 +66,21 @@ export default function GraphNetwork() {
       };
 
       const count = Math.min(
-        260,
-        Math.max(90, Math.floor((width * height) / 32000)),
+        240,
+        Math.max(84, Math.floor((width * height) / 34000)),
       );
 
-      points = [];
-      for (let index = 0; index < count; index += 1) {
-        points.push({
-          x: random() * width,
-          y: random() * height,
-          phase: random() * Math.PI * 2,
-          driftX: 2 + random() * 3,
-          driftY: 2 + random() * 3,
-          offsetX: 0,
-          offsetY: 0,
-        });
-      }
+      points = Array.from({ length: count }, () => ({
+        x: random() * width,
+        y: random() * height,
+        phase: random() * Math.PI * 2,
+        driftX: 2 + random() * 3.5,
+        driftY: 2 + random() * 3.5,
+        offsetX: 0,
+        offsetY: 0,
+      }));
 
-      const maxLinkDistance = Math.max(150, Math.min(260, width * 0.24));
+      const maxLinkDistance = Math.max(145, Math.min(245, width * 0.23));
       const connected = new Set<string>();
       links = [];
 
@@ -88,14 +88,11 @@ export default function GraphNetwork() {
         points
           .map((candidate, candidateIndex) => ({
             candidateIndex,
-            distance: Math.hypot(
-              point.x - candidate.x,
-              point.y - candidate.y,
-            ),
+            distance: Math.hypot(point.x - candidate.x, point.y - candidate.y),
           }))
           .filter(({ candidateIndex }) => candidateIndex !== index)
           .sort((a, b) => a.distance - b.distance)
-          .slice(0, 3)
+          .slice(0, 2)
           .forEach(({ candidateIndex, distance }) => {
             if (distance > maxLinkDistance) return;
 
@@ -105,7 +102,6 @@ export default function GraphNetwork() {
             )}`;
 
             if (connected.has(key)) return;
-
             connected.add(key);
             links.push([index, candidateIndex]);
           });
@@ -115,7 +111,6 @@ export default function GraphNetwork() {
     const getPositions = (time: number) => {
       const pointerX = pointer.clientX;
       const pointerY = pointer.clientY + window.scrollY;
-      const magnetRadius = 190;
 
       return points.map((point) => {
         const baseX =
@@ -132,15 +127,15 @@ export default function GraphNetwork() {
           const dy = pointerY - baseY;
           const distance = Math.hypot(dx, dy);
 
-          if (distance < magnetRadius) {
-            const strength = 1 - distance / magnetRadius;
-            const pull = strength * strength * 0.52;
+          if (distance < MAGNET_RADIUS) {
+            const strength = 1 - distance / MAGNET_RADIUS;
+            const pull = Math.pow(strength, 1.7) * 0.72;
             targetOffsetX = dx * pull;
             targetOffsetY = dy * pull;
           }
         }
 
-        const easing = prefersReducedMotion.matches ? 1 : 0.09;
+        const easing = prefersReducedMotion.matches ? 1 : 0.105;
         point.offsetX += (targetOffsetX - point.offsetX) * easing;
         point.offsetY += (targetOffsetY - point.offsetY) * easing;
 
@@ -151,95 +146,155 @@ export default function GraphNetwork() {
       });
     };
 
+    const drawLine = (
+      ax: number,
+      ay: number,
+      bx: number,
+      by: number,
+      alpha: number,
+      lineWidth = 1,
+    ) => {
+      context.beginPath();
+      context.moveTo(ax, ay);
+      context.lineTo(bx, by);
+      context.strokeStyle = `rgba(${CYAN}, ${alpha})`;
+      context.lineWidth = lineWidth;
+      context.stroke();
+    };
+
     const draw = (time: number) => {
       context.clearRect(0, 0, width, height);
 
       const positions = getPositions(time);
       const pointerX = pointer.clientX;
       const pointerY = pointer.clientY + window.scrollY;
-      const magnetRadius = 190;
 
       links.forEach(([from, to]) => {
         const start = positions[from];
         const end = positions[to];
 
-        const startNear =
+        const startDistance = Math.hypot(start.x - pointerX, start.y - pointerY);
+        const endDistance = Math.hypot(end.x - pointerX, end.y - pointerY);
+        const activeLink =
           pointer.active &&
-          Math.hypot(start.x - pointerX, start.y - pointerY) < magnetRadius;
-        const endNear =
-          pointer.active &&
-          Math.hypot(end.x - pointerX, end.y - pointerY) < magnetRadius;
+          startDistance < MAGNET_RADIUS &&
+          endDistance < MAGNET_RADIUS;
 
-        context.beginPath();
-        context.moveTo(start.x, start.y);
-        context.lineTo(end.x, end.y);
-        context.strokeStyle =
-          startNear && endNear
-            ? "rgba(0, 212, 255, 0.18)"
-            : "rgba(0, 212, 255, 0.045)";
-        context.lineWidth = startNear && endNear ? 1.15 : 1;
-        context.stroke();
+        drawLine(
+          start.x,
+          start.y,
+          end.x,
+          end.y,
+          activeLink ? 0.2 : 0.036,
+          activeLink ? 1.05 : 0.7,
+        );
       });
 
-      if (pointer.active) {
-        const nearby = positions
-          .map((position, index) => ({
-            ...position,
-            index,
-            pointerDistance: Math.hypot(
-              position.x - pointerX,
-              position.y - pointerY,
-            ),
-          }))
-          .filter(({ pointerDistance }) => pointerDistance < magnetRadius);
+      const nearby = pointer.active
+        ? positions
+            .map((position, index) => ({
+              ...position,
+              index,
+              pointerDistance: Math.hypot(
+                position.x - pointerX,
+                position.y - pointerY,
+              ),
+            }))
+            .filter(({ pointerDistance }) => pointerDistance < MAGNET_RADIUS)
+            .sort((a, b) => a.pointerDistance - b.pointerDistance)
+        : [];
 
-        for (let first = 0; first < nearby.length; first += 1) {
-          for (let second = first + 1; second < nearby.length; second += 1) {
-            const a = nearby[first];
-            const b = nearby[second];
-            const distance = Math.hypot(a.x - b.x, a.y - b.y);
+      for (let first = 0; first < nearby.length; first += 1) {
+        for (let second = first + 1; second < nearby.length; second += 1) {
+          const a = nearby[first];
+          const b = nearby[second];
+          const distance = Math.hypot(a.x - b.x, a.y - b.y);
 
-            if (distance > 135) continue;
+          if (distance > CLUSTER_LINK_DISTANCE) continue;
 
-            const strength = 1 - distance / 135;
-            context.beginPath();
-            context.moveTo(a.x, a.y);
-            context.lineTo(b.x, b.y);
-            context.strokeStyle = `rgba(0, 212, 255, ${0.06 + strength * 0.22})`;
-            context.lineWidth = 0.85;
-            context.stroke();
-          }
+          const strength = 1 - distance / CLUSTER_LINK_DISTANCE;
+          const pointerStrength =
+            1 -
+            Math.min(
+              MAGNET_RADIUS,
+              (a.pointerDistance + b.pointerDistance) / 2,
+            ) /
+              MAGNET_RADIUS;
+
+          drawLine(
+            a.x,
+            a.y,
+            b.x,
+            b.y,
+            0.08 + strength * 0.26 + pointerStrength * 0.16,
+            0.75 + pointerStrength * 0.45,
+          );
         }
       }
 
+      nearby.slice(0, 5).forEach((point) => {
+        const strength = 1 - point.pointerDistance / MAGNET_RADIUS;
+        drawLine(
+          pointerX,
+          pointerY,
+          point.x,
+          point.y,
+          0.05 + strength * 0.34,
+          0.7 + strength * 0.45,
+        );
+      });
+
       positions.forEach(({ x, y }, index) => {
-        const nearPointer =
-          pointer.active &&
-          Math.hypot(x - pointerX, y - pointerY) < magnetRadius;
+        const distanceToPointer = pointer.active
+          ? Math.hypot(x - pointerX, y - pointerY)
+          : Infinity;
+        const nearPointer = distanceToPointer < MAGNET_RADIUS;
+        const major = index % 9 === 0;
+        const pointerStrength = nearPointer
+          ? 1 - distanceToPointer / MAGNET_RADIUS
+          : 0;
 
         context.save();
-        context.fillStyle = nearPointer
-          ? "rgba(0, 212, 255, 0.42)"
-          : index % 4 === 0
-            ? "rgba(0, 212, 255, 0.18)"
-            : "rgba(0, 212, 255, 0.08)";
 
-        if (nearPointer) {
-          context.shadowColor = "rgba(0, 212, 255, 0.65)";
-          context.shadowBlur = 10;
+        if (major || nearPointer) {
+          context.shadowColor = `rgba(${CYAN}, ${nearPointer ? 0.9 : 0.5})`;
+          context.shadowBlur = nearPointer
+            ? 10 + pointerStrength * 12
+            : 9;
         }
+
+        context.fillStyle = nearPointer
+          ? `rgba(${CYAN}, ${0.24 + pointerStrength * 0.58})`
+          : major
+            ? `rgba(${CYAN}, 0.34)`
+            : `rgba(${CYAN}, 0.1)`;
 
         context.beginPath();
         context.arc(
           x,
           y,
-          nearPointer ? 1.8 : index % 4 === 0 ? 1.4 : 1,
+          nearPointer
+            ? 1.35 + pointerStrength * 1.55
+            : major
+              ? 2.05
+              : 0.95,
           0,
           Math.PI * 2,
         );
         context.fill();
         context.restore();
       });
+
+      if (pointer.active && nearby.length > 0) {
+        context.save();
+        context.shadowColor = `rgba(${CYAN}, 0.75)`;
+        context.shadowBlur = 10;
+        context.fillStyle = `rgba(${CYAN}, 0.32)`;
+        context.beginPath();
+        context.arc(pointerX, pointerY, 1.4, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+      }
     };
 
     const updatePointer = (event: PointerEvent) => {

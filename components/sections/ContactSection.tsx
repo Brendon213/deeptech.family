@@ -2,25 +2,23 @@
 
 import { FormEvent, useState } from "react";
 import Icon from "@/components/Icon";
+import { useLanguage } from "@/components/LanguageProvider";
 
-const channels = [
-  { label: "Телефон", value: "+79532822222", icon: "phone" as const },
-  { label: "Telegram", value: "@go_to_market_IT", icon: "message-circle" as const },
-  { label: "Email", value: "office@deeptech.family", icon: "mail" as const },
-  { label: "WhatsApp", value: "Канал пока недоступен", icon: "message-circle" as const },
-];
+const channelValues = ["+79532822222", "@go_to_market_IT", "office@deeptech.family", null] as const;
+const channelIcons = ["phone", "message-circle", "mail", "message-circle"] as const;
 
 export default function ContactSection() {
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState("");
+  const { t } = useLanguage();
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!consent) {
-      setStatus("Подтвердите согласие, чтобы подготовить заявку.");
+      setStatus(t.contact.consentError);
       return;
     }
-    setStatus("Приём заявок пока недоступен: каналы подключения ожидают настройки. Данные не отправлены.");
+    setStatus(t.contact.unavailable);
   };
 
   return (
@@ -29,25 +27,25 @@ export default function ContactSection() {
       <div className="container entry-container">
         <div className="entry-box glass-panel">
           <div className="entry-heading">
-            <span className="eyebrow-badge">Доступ к экосистеме</span>
-            <h2>Связаться с нами</h2>
-            <p>Оставьте задачу — когда каналы будут подключены, мы добавим безопасную доставку заявки.</p>
+            <span className="eyebrow-badge">{t.contact.badge}</span>
+            <h2>{t.contact.title}</h2>
+            <p>{t.contact.lead}</p>
           </div>
 
           <form className="request-form" onSubmit={handleSubmit} noValidate>
             <div className="form-fields">
               <label>
-                Имя
-                <input name="name" type="text" placeholder="Ваше имя" autoComplete="name" />
+                {t.contact.name}
+                <input name="name" type="text" placeholder={t.contact.namePlaceholder} autoComplete="name" />
               </label>
               <label>
-                Контакт
-                <input name="contact" type="text" placeholder="Телефон или email" autoComplete="email" />
+                {t.contact.contact}
+                <input name="contact" type="text" placeholder={t.contact.contactPlaceholder} autoComplete="email" />
               </label>
             </div>
             <label>
-              Коротко о задаче
-              <textarea name="message" rows={3} placeholder="Что нужно запустить или масштабировать?" />
+              {t.contact.task}
+              <textarea name="message" rows={3} placeholder={t.contact.taskPlaceholder} />
             </label>
 
             <label className="consent-row">
@@ -59,27 +57,27 @@ export default function ContactSection() {
                 onChange={(event) => setConsent(event.target.checked)}
               />
               <span>
-                Я согласен(а) на обработку персональных данных в соответствии с Федеральным законом № 152-ФЗ «О персональных данных» и <a href="/privacy">Политикой конфиденциальности</a>. Данные используются только для коммуникации.
+                {t.contact.consentPrefix} <a href="/privacy">{t.contact.privacy}</a>. {t.contact.consentSuffix}
               </span>
             </label>
 
             <button className="submit-placeholder" type="submit" disabled={!consent}>
-              Отправить заявку
+              {t.contact.submit}
               <Icon name="arrow-down" size={18} />
             </button>
             {status && <p className="form-status" role="status">{status}</p>}
           </form>
 
-          <div className="channel-grid" aria-label="Каналы связи пока недоступны">
-            {channels.map((channel) => (
-              <button className="channel-placeholder" disabled key={channel.label} type="button" title="Канал пока не подключён">
-                <Icon name={channel.icon} size={20} />
-                <span>{channel.label}</span>
-                <small>{channel.value}</small>
+          <div className="channel-grid" aria-label={t.contact.channelsAria}>
+            {t.contact.labels.map((label, index) => (
+              <button className="channel-placeholder" disabled key={label} type="button" title={t.contact.channelTitle}>
+                <Icon name={channelIcons[index]} size={20} />
+                <span>{label}</span>
+                <small>{channelValues[index] ?? t.contact.unavailableChannel}</small>
               </button>
             ))}
           </div>
-          <p className="entry-note">Каналы связи будут активированы после получения настроек. Реальные заявки сейчас не отправляются.</p>
+          <p className="entry-note">{t.contact.note}</p>
         </div>
       </div>
     </section>

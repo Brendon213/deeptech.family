@@ -1,29 +1,30 @@
-import Icon from "@/components/Icon";
+"use client";
 
-const contacts = [
-  { icon: "mail" as const, label: "Email", value: "office@deeptech.family", note: "Ответ в течение 24 ч" },
-  { icon: "message-circle" as const, label: "Telegram", value: "@go_to_market_IT", note: "Оперативный канал" },
-  { icon: "phone" as const, label: "Телефон", value: "+79532822222", note: "Консультация специалиста" },
-  { icon: "map-pin" as const, label: "Международное сотрудничество", value: "Технологические партнёрства", note: "Партнёрства и масштабирование" },
-];
+import Icon from "@/components/Icon";
+import { useLanguage } from "@/components/LanguageProvider";
+
+const icons = ["mail", "message-circle", "phone", "map-pin"] as const;
+const values = ["office@deeptech.family", "@go_to_market_IT", "+79532822222"] as const;
 
 export default function Contacts() {
+  const { t } = useLanguage();
+
   return (
     <section className="section contacts-section" id="contacts">
       <div className="contacts-glow" aria-hidden="true" />
       <div className="container">
         <div className="section-heading centered">
-          <h2>Контакты</h2>
-          <p className="section-lead">Операционная система международного технологического партнёрства — инфраструктура для пилотов, рынков и промышленного масштабирования DEEP TECH решений.</p>
+          <h2>{t.contacts.title}</h2>
+          <p className="section-lead">{t.contacts.lead}</p>
         </div>
 
         <div className="contacts-grid">
-          {contacts.map((contact) => (
-            <div className="glass-panel contact-card" key={contact.label}>
-              <Icon name={contact.icon} size={28} className="accent-icon" />
-              <h3>{contact.label}</h3>
-              <p className="contact-value">{contact.value}</p>
-              <p>{contact.note}</p>
+          {t.contacts.labels.map((label, index) => (
+            <div className="glass-panel contact-card" key={label}>
+              <Icon name={icons[index]} size={28} className="accent-icon" />
+              <h3>{label}</h3>
+              <p className="contact-value">{index < 3 ? values[index] : t.contacts.partnership}</p>
+              <p>{t.contacts.notes[index]}</p>
             </div>
           ))}
         </div>

@@ -1,238 +1,85 @@
-# Assets manifest
+# Реестр assets текущего deeptech.family
 
-Дата: 2026-09-23
+Дата проверки: 2026-09-23
 
-Цель: зафиксировать, какие визуальные ресурсы нужны для точного переноса текущего deeptech.family.
+Источник: [https://deeptech.family/](https://deeptech.family/)
+Проверено на опубликованной странице и в её публичных ресурсах. В репозиторий добавлены только файлы, которые удалось связать с реально отрендеренным DOM или с успешно загруженным stylesheet Google Fonts.
 
-## 1. Обязательные assets
+## Что подтверждено на источнике
 
-### Логотип / wordmark
+- Wordmark — текстовые узлы `DT` и `DEEP TECH BRICS+` в Header и `DEEP TECH` в Footer. Отдельного файла логотипа нет.
+- На странице нет `<img>` и внешних изображений. Обнаружен один canvas-фон (`fixed inset-0 w-full h-full pointer-events-none`); его точки/линии и CSS-градиенты не являются переносимыми image assets.
+- CSS страницы не содержит `url(...)` для фоновых или секционных изображений.
+- В закрытом состоянии страницы отрендерены 40 inline SVG Lucide. При открытии мобильного меню `menu` заменяется на подтверждённый `close` (`inline-svg:2675e09848999860`); вместе оба состояния дают 41 наблюдаемый ресурс и 27 уникальных геометрий.
+- Карусель Infrastructure проверена во всех 4 состояниях точек. Состояния показывают только текстовые карточки: `Deep Tech Academy / Deep Tech Advisors / Deep Tech Accelerator / Deep Tech Events`; `Глобальная сеть / Создатель партнёрства / Go-To-Market / Витрина запросов`; `Платёжные шлюзы / Юридический блок / Бухгалтерия и учёт / GR и институты`; `Deep Tech Media / Бизнес-стек и лиды / Финансовые ресурсы / Веб-инфраструктура`. Во всех состояниях `img/video/source=0`, дополнительные фоновые media URL и новые SVG не появляются. Кнопки перелистывания используют подтверждённые `chevron-left.svg` и `chevron-right.svg`.
+- В `<head>` подключён Google Fonts stylesheet для Inter. В браузере stylesheet завершил загрузку (`document.fonts.status=loaded`, `document.fonts.check('16px Inter')=true`, 49 face declarations); вычисленный `font-family` элементов страницы начинается с `Inter`. Наблюдаемые веса: 400, 500, 600 и 700.
+- `GET https://deeptech.family/vite.svg` отвечает 404. В `<head>` нет `apple-touch-icon` или `manifest`.
+- `og:image` и `twitter:image` указывают на `https://deeptech.family/og-image.jpg`, но источник отвечает 404. Файл не добавлен.
+- JSON-LD `Organization.logo` объявляет `https://deeptech.family/logo.png`, но источник отвечает 404. Файл не добавлен.
 
-Нужны:
-- основной логотип DEEP TECH в SVG;
-- светлая версия для тёмного фона, если в оригинале используется отдельный вариант;
-- тёмная версия для светлого фона, если в оригинале используется отдельный вариант.
+Статический список `font-family` сам по себе не считался достаточным подтверждением: для Inter дополнительно проверены состояние `document.fonts` и вычисленные стили живой страницы. Это подтверждает загрузку набора объявленных face и запрос `Inter` вычисленными стилями, но не утверждает, какой subset-файл обслужил каждый отдельный glyph.
 
-Путь:
-- `public/assets/brand/logo.svg`
-- `public/assets/brand/logo-light.svg`
-- `public/assets/brand/logo-dark.svg`
-
-Статус: точные исходники пока не извлечены.
-
-### Favicon
-
-Нужны:
-- favicon.svg или favicon.ico;
-- apple-touch-icon.png, если он есть в текущем проекте.
-
-Путь:
-- `public/assets/brand/favicon.svg`
-- `public/assets/brand/apple-touch-icon.png`
-
-Статус: требуется извлечь из оригинала.
+## Локальные подтверждённые файлы
 
 ### Шрифты
 
-Текущий сайт собран на Tilda. Tilda поддерживает Tilda Sans, Google Fonts, Adobe Fonts и пользовательские WOFF/WOFF2, поэтому факт использования Tilda сам по себе не подтверждает конкретный шрифт сайта.
+Оба файла — точные ответы `font/woff2` с URL, указанными в загруженном stylesheet [Inter](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap). В stylesheet один и тот же URL используется для всех объявленных весов соответствующего subset; на странице реально наблюдались веса 400/500/600/700.
 
-Нужно определить точные:
-- font-family заголовков;
-- font-family основного текста;
-- используемые веса;
-- реальные WOFF/WOFF2, если шрифт загружен локально.
+| Файл | Статус | Subset | Источник | SHA-256 |
+|---|---|---|---|---|
+| `public/assets/fonts/inter-cyrillic.woff2` | confirmed | cyrillic | `https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7SUc.woff2` | `71D5EE93CC1E9F1D520A3A8B66456DE18C7879D8DF09D57FCD2EAFF75FEF0075` |
+| `public/assets/fonts/inter-latin.woff2` | confirmed | latin | `https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2` | `3100E775E8616CD2611BEECFA23A4263D7037586789B43F035236A2E6FBD4C62` |
 
-Папка:
-- `public/assets/fonts/`
+Кириллический и Latin subsets достаточны для фактически присутствующих русских и ASCII/Latin текстов. Greek, Vietnamese и latin-ext subsets в локальный реестр не включены: соответствующие диапазоны не требовались наблюдаемым контентом.
 
-Предпочтительные имена:
-- `heading-regular.woff2`
-- `heading-semibold.woff2`
-- `heading-bold.woff2`
-- `body-regular.woff2`
-- `body-medium.woff2`
+### Inline SVG, дедуплицированные по геометрии
 
-Не загружать Tilda Sans только потому, что сайт работает на Tilda. Сначала подтвердить фактический font-family.
+Каждый файл ниже содержит исходные SVG-геометрию, размеры, `viewBox` и stroke-атрибуты. Удалены только runtime-атрибуты `class` и `code-path`; `aria-hidden` и геометрия сохранены. `inline-svg:<id>` — имя ресурса из публичного capture manifest страницы.
 
-## 2. Иконки
-
-Для текущей структуры лендинга нужны как минимум категории иконок:
-
-### Контакты
-- phone;
-- email;
-- telegram.
-
-Пути:
-- `public/assets/icons/phone.svg`
-- `public/assets/icons/email.svg`
-- `public/assets/icons/telegram.svg`
-
-### UI
-- arrow-right;
-- chevron / arrow для CTA и маршрутов;
-- menu;
-- close;
-- language / globe, только если такая иконка реально используется в оригинале.
-
-Пути:
-- `public/assets/icons/arrow-right.svg`
-- `public/assets/icons/menu.svg`
-- `public/assets/icons/close.svg`
-- `public/assets/icons/globe.svg`
-
-### Секционные иконки
-Если в оригинале у Challenges, Ecosystem, Routes или Infrastructure есть отдельные SVG/PNG-иконки, их переносить по одной на сущность, а не перерисовывать случайными иконками.
-
-Пример:
-- `public/assets/icons/challenges/`
-- `public/assets/icons/ecosystem/`
-- `public/assets/icons/routes/`
-- `public/assets/icons/infrastructure/`
-
-Статус: конкретные файлы требуют извлечения из оригинала.
-
-## 3. Изображения
-
-По публичному текстовому обходу обязательные контентные изображения не подтверждены.
-
-Но Tilda часто использует background-image и Zero Block assets, которые не видны как отдельный текстовый контент.
-
-Проверить и извлечь:
-
-### Hero
-- hero background;
-- декоративную графику;
-- mockup/illustration, если она есть;
-- gradient/background texture, если это bitmap/SVG, а не CSS.
-
-Папка:
-- `public/assets/images/hero/`
-
-### Challenges
-- фоновые изображения карточек, если используются;
-- декоративные элементы.
-
-Папка:
-- `public/assets/images/challenges/`
-
-### Ecosystem
-- иллюстрации/обложки для 6 модулей, если есть.
-
-Папка:
-- `public/assets/images/ecosystem/`
-
-### Infrastructure
-- изображения/обложки Academy, Advisors, Accelerator, Events, если используются.
-
-Папка:
-- `public/assets/images/infrastructure/`
-
-### General
-- background textures;
-- section separators;
-- decorative blobs;
-- screenshots;
-- partner/company logos.
-
-Папки:
-- `public/assets/images/backgrounds/`
-- `public/assets/images/decor/`
-- `public/assets/images/logos/`
-
-## 4. Что не надо сохранять как image
-
-Если элемент оригинала реализован обычным CSS, переносить его как CSS, а не скриншотом:
-
-- градиенты;
-- однотонные фоны;
-- рамки;
-- тени;
-- border-radius;
-- простые линии;
-- стандартные стрелки, если они корректно воспроизводятся SVG/CSS.
-
-## 5. Форматы
-
-Предпочтения:
-
-- логотип и простые иконки: SVG;
-- фотографии: WebP/AVIF;
-- PNG только при необходимости прозрачности или если оригинал невозможно безопасно конвертировать;
-- шрифты: WOFF2;
-- favicon: SVG/ICO в зависимости от оригинала.
-
-## 6. Правила именования
-
-Использовать:
-- lowercase;
-- kebab-case;
-- смысловые названия;
-- без `img1`, `photo2`, `icon-new-final`.
-
-Пример:
-
-```text
-public/assets/
-├── brand/
-│   ├── logo.svg
-│   ├── logo-light.svg
-│   ├── logo-dark.svg
-│   ├── favicon.svg
-│   └── apple-touch-icon.png
-├── fonts/
-├── icons/
-│   ├── phone.svg
-│   ├── email.svg
-│   ├── telegram.svg
-│   ├── arrow-right.svg
-│   ├── menu.svg
-│   ├── close.svg
-│   ├── challenges/
-│   ├── ecosystem/
-│   ├── routes/
-│   └── infrastructure/
-└── images/
-    ├── hero/
-    ├── challenges/
-    ├── ecosystem/
-    ├── infrastructure/
-    ├── backgrounds/
-    ├── decor/
-    └── logos/
-```
-
-## 7. Статусы
-
-Использовать три статуса:
-
-- `confirmed` — файл подтверждён в оригинальном сайте;
-- `required-to-extract` — категория явно нужна, но конкретный исходник ещё не извлечён;
-- `optional` — добавляется только если реально присутствует в оригинале.
-
-## 8. Текущий реестр
-
-| Asset | Статус | Комментарий |
+| Файл | Статус | Источник и исходный code-path |
 |---|---|---|
-| основной logo/wordmark | required-to-extract | нужен для Header/Footer |
-| light logo | optional | только если отдельный исходник есть в оригинале |
-| dark logo | optional | только если отдельный исходник есть в оригинале |
-| favicon | required-to-extract | извлечь из текущего сайта |
-| apple touch icon | optional | если используется |
-| heading font | required-to-extract | точный font-family пока не подтверждён |
-| body font | required-to-extract | точный font-family пока не подтверждён |
-| phone icon | required-to-extract | если оригинал использует SVG/иконку |
-| email icon | required-to-extract | если оригинал использует SVG/иконку |
-| Telegram icon | required-to-extract | если оригинал использует SVG/иконку |
-| menu/close | required-to-extract | нужны для mobile nav |
-| route arrows | required-to-extract | если это отдельные SVG |
-| Hero visual | required-to-extract | проверить background/Zero Block |
-| section card visuals | optional | только если есть в оригинале |
-| partner/company logos | optional | только если есть в оригинале |
-| decorative backgrounds | optional | извлечь только реальные assets |
+| `public/assets/icons/arrow-right.svg` | confirmed | `inline-svg:82d68a99b284d1d6` — `src/sections/Hero.tsx:53:13`; повторы: `0565f37a0e5ff108`, `28f073888f75a412`, `40fc554fb300466c`, `6f6c5cfe8be15bdc`, `74f839ffa0c883d6`, `e894fbdc1794d94f`, `ab853868ae34d005` — RoleSelection/Infrastructure |
+| `public/assets/icons/globe.svg` | confirmed | `5748890c0d1b0ab5` — `src/components/Navigation.tsx:83:17`; повтор `de2dfee05c238603` — `src/sections/RoleSelection.tsx:49:21` |
+| `public/assets/icons/menu.svg` | confirmed | `251531e740d09869` — `src/components/Navigation.tsx:108:41` |
+| `public/assets/icons/close.svg` | confirmed | `inline-svg:2675e09848999860` — открытое мобильное меню, `src/components/Navigation.tsx:108:23` |
+| `public/assets/icons/building-2.svg` | confirmed | `f24c385422b06e2e` — `src/sections/Hero.tsx:72:15`; повтор `7dcfa72a20b5ed6c` — `src/sections/RoleSelection.tsx:49:21` |
+| `public/assets/icons/landmark.svg` | confirmed | `985b16fce150e741` — `src/sections/Hero.tsx:72:15`; повтор `0634e5e5e90516ec` — `src/sections/EcosystemModules.tsx:45:19` |
+| `public/assets/icons/cpu.svg` | confirmed | `91a4ae56395845e9` — `src/sections/Hero.tsx:72:15`; повтор `cfc6e127549695bb` — `src/sections/RoleSelection.tsx:49:21` |
+| `public/assets/icons/chart-column.svg` | confirmed | `65b38c2509f3a768` — `src/sections/Hero.tsx:72:15` |
+| `public/assets/icons/timer.svg` | confirmed | `7e24ca547761ae78` — `src/sections/Problems.tsx:53:21` |
+| `public/assets/icons/trending-down.svg` | confirmed | `8303feea8bf49c58` — `src/sections/Problems.tsx:53:21` |
+| `public/assets/icons/circle-dashed.svg` | confirmed | `437d3aff295eedaf` — `src/sections/Problems.tsx:53:21` |
+| `public/assets/icons/gauge.svg` | confirmed | `db4e07bc0b87ee8d` — `src/sections/Problems.tsx:53:21` |
+| `public/assets/icons/arrow-down.svg` | confirmed | `14a9af4e80c7554e` — `src/sections/EntryForm.tsx:97:13` |
+| `public/assets/icons/phone.svg` | confirmed | `ea2458dde7164c45` — `src/sections/EntryForm.tsx:112:17`; повтор `7b311e8157ac2c15` — `src/sections/Contacts.tsx:70:15` |
+| `public/assets/icons/message-circle.svg` | confirmed | `a73c03aa41cacfac` — `src/sections/EntryForm.tsx:112:17`; повтор `6075fc5bda854994` — `src/sections/Contacts.tsx:70:15` |
+| `public/assets/icons/mail.svg` | confirmed | `8bcd6f02bf87ae65` — `src/sections/EntryForm.tsx:112:17`; повтор `efd0bc1eef6e47a9` — `src/sections/Contacts.tsx:70:15` |
+| `public/assets/icons/target.svg` | confirmed | `15c3e989e42d7a27` — `src/sections/EcosystemModules.tsx:45:19` |
+| `public/assets/icons/users.svg` | confirmed | `a63200b188f27d48` — `src/sections/EcosystemModules.tsx:45:19` |
+| `public/assets/icons/graduation-cap.svg` | confirmed | `d5769da3d39b8680` — `src/sections/EcosystemModules.tsx:45:19` |
+| `public/assets/icons/radio.svg` | confirmed | `67e229554b4f500d` — `src/sections/EcosystemModules.tsx:45:19` |
+| `public/assets/icons/trending-up.svg` | confirmed | `79ef1491645af82a` — `src/sections/EcosystemModules.tsx:45:19` |
+| `public/assets/icons/code-xml.svg` | confirmed | `16c2dd22541bf2cf` — `src/sections/RoleSelection.tsx:49:21` |
+| `public/assets/icons/briefcase.svg` | confirmed | `1e298395a89c8aeb` — `src/sections/RoleSelection.tsx:49:21` |
+| `public/assets/icons/handshake.svg` | confirmed | `1584b6195f0d0e28` — `src/sections/RoleSelection.tsx:49:21` |
+| `public/assets/icons/chevron-left.svg` | confirmed | `0cf292a9e38474e1` — `src/sections/Infrastructure.tsx:51:17` |
+| `public/assets/icons/chevron-right.svg` | confirmed | `9ce2e0b9b438622a` — `src/sections/Infrastructure.tsx:61:17` |
+| `public/assets/icons/map-pin.svg` | confirmed | `0f334192c2405819` — `src/sections/Contacts.tsx:70:15` |
 
-## 9. Следующий шаг
+`message-circle.svg` — фактически используемый универсальный Lucide-значок Telegram-контакта; отдельного Telegram brand SVG на странице нет. Аналогично `mail.svg` и `phone.svg` — фактические inline icons для контактов.
 
-На следующем этапе нужно извлечь реальные URL/файлы из опубликованной Tilda-страницы и заполнить этот манифест фактическими именами и источниками.
+## Не добавлялось из-за отсутствия подтверждённого файла
 
-До этого нельзя подменять оригинальные assets случайными изображениями или универсальными icon packs.
+| Категория | Статус | Доказательство |
+|---|---|---|
+| Отдельный logo/wordmark SVG | confirmed (text/CSS) | Wordmark отрендерен как текст `DT` / `DEEP TECH BRICS+`; `<img>`/внешний logo SVG отсутствует |
+| `public/assets/brand/favicon.svg` или `.ico` | required-to-extract | HTML ссылается на `/vite.svg`, но `GET https://deeptech.family/vite.svg` = 404 |
+| `public/assets/brand/apple-touch-icon.png` | optional | `link[rel=apple-touch-icon]` отсутствует |
+| Hero/section raster images | optional | `document.images.length=0`; media URLs не обнаружены |
+| Background/texture/partner logos | optional | один canvas и CSS-градиенты; CSS capture содержит 0 `url(...)` |
+| `og-image.jpg` / Twitter image | optional | заявленный `https://deeptech.family/og-image.jpg` = 404 |
+| JSON-LD `Organization.logo` | required-to-extract | заявленный `https://deeptech.family/logo.png` = 404 |
+
+## Проверка происхождения
+
+Capture manifest публичной страницы зафиксировал 40 SVG в закрытом состоянии и 40 SVG в открытом мобильном состоянии; только `menu`/`close` меняются местами. Две таблицы стилей загружены, `/vite.svg` не загрузился. При переносе runtime `class`/`code-path` не используются как часть графики и удалены только для возможности автономно хранить SVG; исходная геометрия не перерисовывалась и не заменялась icon pack. Приложение и его исходники в этой ветке не изменялись.

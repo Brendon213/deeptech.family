@@ -54,23 +54,6 @@ export default function NetworkBackground() {
       }));
     };
 
-    const resize = () => {
-      const rect = parent.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-      width = Math.max(1, rect.width);
-      height = Math.max(1, rect.height);
-
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      canvas.style.width = \`\${width}px\`;
-      canvas.style.height = \`\${height}px\`;
-
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
-      createPoints();
-      draw(performance.now(), false);
-    };
-
     const draw = (timestamp: number, advance = true) => {
       context.clearRect(0, 0, width, height);
 
@@ -107,7 +90,7 @@ export default function NetworkBackground() {
           context.beginPath();
           context.moveTo(point.x, point.y);
           context.lineTo(other.x, other.y);
-          context.strokeStyle = \`rgba(\${CYAN}, \${0.04 + strength * 0.24})\`;
+          context.strokeStyle = `rgba(${CYAN}, ${0.04 + strength * 0.24})`;
           context.lineWidth = 0.7;
           context.stroke();
         }
@@ -117,14 +100,31 @@ export default function NetworkBackground() {
         const pulse = 0.75 + Math.sin(timestamp / 900 + point.phase) * 0.25;
 
         context.save();
-        context.shadowColor = \`rgba(\${CYAN}, 0.9)\`;
+        context.shadowColor = `rgba(${CYAN}, 0.9)`;
         context.shadowBlur = 10 * pulse;
         context.beginPath();
         context.arc(point.x, point.y, point.radius * pulse, 0, Math.PI * 2);
-        context.fillStyle = \`rgba(\${CYAN}, \${0.5 + pulse * 0.35})\`;
+        context.fillStyle = `rgba(${CYAN}, ${0.5 + pulse * 0.35})`;
         context.fill();
         context.restore();
       });
+    };
+
+    const resize = () => {
+      const rect = parent.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      width = Math.max(1, rect.width);
+      height = Math.max(1, rect.height);
+
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      createPoints();
+      draw(performance.now(), false);
     };
 
     const animate = (timestamp: number) => {
@@ -139,6 +139,7 @@ export default function NetworkBackground() {
     };
 
     const resizeObserver = new ResizeObserver(resize);
+    resize();
     resizeObserver.observe(parent);
 
     if (!reducedMotion) {

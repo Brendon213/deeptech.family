@@ -15,6 +15,7 @@
 - В `<head>` подключён Google Fonts stylesheet для Inter. В браузере stylesheet завершил загрузку (`document.fonts.status=loaded`, `document.fonts.check('16px Inter')=true`, 49 face declarations); вычисленный `font-family` элементов страницы начинается с `Inter`. Наблюдаемые веса: 400, 500, 600 и 700.
 - `GET https://deeptech.family/vite.svg` отвечает 404. В `<head>` нет `apple-touch-icon` или `manifest`.
 - `og:image` и `twitter:image` указывают на `https://deeptech.family/og-image.jpg`, но источник отвечает 404. Файл не добавлен.
+- JSON-LD `Organization.logo` объявляет `https://deeptech.family/logo.png`, но источник отвечает 404. Файл не добавлен.
 
 Статический список `font-family` сам по себе не считался достаточным подтверждением: для Inter дополнительно проверены состояние `document.fonts` и вычисленные стили живой страницы. Это подтверждает загрузку набора объявленных face и запрос `Inter` вычисленными стилями, но не утверждает, какой subset-файл обслужил каждый отдельный glyph.
 
@@ -77,6 +78,7 @@
 | Hero/section raster images | optional | `document.images.length=0`; media URLs не обнаружены |
 | Background/texture/partner logos | optional | один canvas и CSS-градиенты; CSS capture содержит 0 `url(...)` |
 | `og-image.jpg` / Twitter image | optional | заявленный `https://deeptech.family/og-image.jpg` = 404 |
+| JSON-LD `Organization.logo` | required-to-extract | заявленный `https://deeptech.family/logo.png` = 404 |
 
 ## Проверка происхождения
 

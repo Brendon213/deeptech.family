@@ -5,10 +5,18 @@ import { useEffect, useRef } from "react";
 type Point = {
   x: number;
   y: number;
+  homeX: number;
+  homeY: number;
   vx: number;
   vy: number;
   radius: number;
   phase: number;
+};
+
+type PointerState = {
+  x: number;
+  y: number;
+  active: boolean;
 };
 
 const CYAN = "0, 229, 255";
@@ -36,41 +44,86 @@ export default function NetworkBackground() {
     let points: Point[] = [];
     let lastTimestamp = 0;
 
+    const pointer: PointerState = {
+      x: 0,
+      y: 0,
+      active: false,
+    };
+
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
     const createPoints = () => {
       const area = width * height;
-      const count = Math.max(14, Math.min(34, Math.round(area / 42000)));
+      const count = Math.max(18, Math.min(40, Math.round(area / 36000)));
 
-      points = Array.from({ length: count }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.14,
-        vy: (Math.random() - 0.5) * 0.14,
-        radius: 0.9 + Math.random() * 1.5,
-        phase: Math.random() * Math.PI * 2,
-      }));
+      points = Array.from({ length: count }, () => {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+
+        return {
+          x,
+          y,
+          homeX: x,
+          homeY: y,
+          vx: 0,
+          vy: 0,
+          radius: 0.9 + Math.random() * 1.4,
+          phase: Math.random() * Math.PI * 2,
+        };
+      });
+    };
+
+    const updatePoint = (point: Point, timestamp: number) => {
+      const driftX = Math.sin(timestamp / 3600 + point.phase) * 0.04;
+      const driftY = Math.cos(timestamp / 4200 + point.phase) * 0.04;
+
+      point.homeX += driftX;
+      point.homeY += driftY;
+
+      if (point.homeX < -20) point.homeX = width + 20;
+      if (point.homeX > width + 20) point.homeX = -20;
+      if (point.homeY < -20) point.homeY = height + 20;
+      if (point.homeY > height + 20) point.homeY = -20;
+
+      let targetX = point.homeX;
+      let targetY = point.homeY;
+
+      if (pointer.active) {
+        const dx = pointer.x - point.x;
+        const dy = pointer.y - point.y;
+        const distance = Math.hypot(dx, dy);
+        const magnetRadius = 190;
+
+        if (distance < magnetRadius) {
+          const strength = 1 - distance / magnetRadius;
+          const pull = strength * strength;
+
+          targetX = point.homeX + (pointer.x - point.homeX) * pull * 0.62;
+          targetY = point.homeY + (pointer.y - point.homeY) * pull * 0.62;
+        }
+      }
+
+      point.vx += (targetX - point.x) * 0.018;
+      point.vy += (targetY - point.y) * 0.018;
+
+      point.vx *= 0.9;
+      point.vy *= 0.9;
+
+      point.x += point.vx;
+      point.y += point.vy;
     };
 
     const draw = (timestamp: number, advance = true) => {
       context.clearRect(0, 0, width, height);
 
-      const connectionDistance = Math.min(175, Math.max(125, width * 0.15));
+      if (advance) {
+        points.forEach((point) => updatePoint(point, timestamp));
+      }
 
       for (let index = 0; index < points.length; index += 1) {
         const point = points[index];
-
-        if (advance) {
-          point.x += point.vx;
-          point.y += point.vy;
-
-          if (point.x < -20) point.x = width + 20;
-          if (point.x > width + 20) point.x = -20;
-          if (point.y < -20) point.y = height + 20;
-          if (point.y > height + 20) point.y = -20;
-        }
 
         for (
           let secondIndex = index + 1;
@@ -82,29 +135,54 @@ export default function NetworkBackground() {
           const dy = point.y - other.y;
           const distance = Math.hypot(dx, dy);
 
+          const pointNearPointer =
+            pointer.active &&
+            Math.hypot(point.x - pointer.x, point.y - pointer.y) < 190;
+          const otherNearPointer =
+            pointer.active &&
+            Math.hypot(other.x - pointer.x, other.y - pointer.y) < 190;
+
+          const connectionDistance =
+            pointNearPointer && otherNearPointer ? 190 : 112;
+
           if (distance > connectionDistance) {
             continue;
           }
 
           const strength = 1 - distance / connectionDistance;
+          const alpha =
+            pointNearPointer && otherNearPointer
+              ? 0.08 + strength * 0.42
+              : 0.025 + strength * 0.14;
+
           context.beginPath();
           context.moveTo(point.x, point.y);
           context.lineTo(other.x, other.y);
-          context.strokeStyle = `rgba(${CYAN}, ${0.04 + strength * 0.24})`;
-          context.lineWidth = 0.7;
+          context.strokeStyle = `rgba(${CYAN}, ${alpha})`;
+          context.lineWidth =
+            pointNearPointer && otherNearPointer ? 0.95 : 0.65;
           context.stroke();
         }
       }
 
       points.forEach((point) => {
         const pulse = 0.75 + Math.sin(timestamp / 900 + point.phase) * 0.25;
+        const nearPointer =
+          pointer.active &&
+          Math.hypot(point.x - pointer.x, point.y - pointer.y) < 190;
 
         context.save();
-        context.shadowColor = `rgba(${CYAN}, 0.9)`;
-        context.shadowBlur = 10 * pulse;
+        context.shadowColor = `rgba(${CYAN}, ${nearPointer ? 1 : 0.8})`;
+        context.shadowBlur = (nearPointer ? 15 : 9) * pulse;
         context.beginPath();
-        context.arc(point.x, point.y, point.radius * pulse, 0, Math.PI * 2);
-        context.fillStyle = `rgba(${CYAN}, ${0.5 + pulse * 0.35})`;
+        context.arc(
+          point.x,
+          point.y,
+          point.radius * pulse * (nearPointer ? 1.18 : 1),
+          0,
+          Math.PI * 2,
+        );
+        context.fillStyle = `rgba(${CYAN}, ${nearPointer ? 0.95 : 0.7})`;
         context.fill();
         context.restore();
       });
@@ -127,6 +205,25 @@ export default function NetworkBackground() {
       draw(performance.now(), false);
     };
 
+    const updatePointer = (event: PointerEvent) => {
+      const rect = parent.getBoundingClientRect();
+      pointer.x = event.clientX - rect.left;
+      pointer.y = event.clientY - rect.top;
+      pointer.active = true;
+
+      if (reducedMotion) {
+        draw(performance.now(), true);
+      }
+    };
+
+    const clearPointer = () => {
+      pointer.active = false;
+
+      if (reducedMotion) {
+        draw(performance.now(), true);
+      }
+    };
+
     const animate = (timestamp: number) => {
       const delta = timestamp - lastTimestamp;
 
@@ -142,12 +239,17 @@ export default function NetworkBackground() {
     resize();
     resizeObserver.observe(parent);
 
+    parent.addEventListener("pointermove", updatePointer);
+    parent.addEventListener("pointerleave", clearPointer);
+
     if (!reducedMotion) {
       animationFrame = window.requestAnimationFrame(animate);
     }
 
     return () => {
       resizeObserver.disconnect();
+      parent.removeEventListener("pointermove", updatePointer);
+      parent.removeEventListener("pointerleave", clearPointer);
       window.cancelAnimationFrame(animationFrame);
     };
   }, []);

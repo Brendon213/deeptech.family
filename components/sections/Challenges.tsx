@@ -1,3 +1,5 @@
+import NetworkBackground from "@/components/NetworkBackground";
+
 const items = [
   "Схлопывание окна возможностей",
   "Долина смерти коммерциализации",
@@ -7,16 +9,28 @@ const items = [
 
 export default function Challenges() {
   return (
-    <section className="section" id="requests">
-      <div className="container">
-        <p className="eyebrow">Проблема</p>
-        <h2>Почему сильные технологии не доходят до масштабирования</h2>
+    <section className="section challenges-section" id="requests">
+      <NetworkBackground />
 
-        <div className="card-grid">
+      <div className="container challenges-content">
+        <p className="eyebrow challenges-eyebrow">Вызовы коммерциализации</p>
+        <h2>
+          Технологическое преимущество
+          <span> перестало быть устойчивым</span>
+        </h2>
+        <p className="challenges-lead">
+          Четыре ключевых барьера, которые разрушают инновации на пути от
+          лаборатории к рынку
+        </p>
+
+        <div className="card-grid challenges-grid">
           {items.map((item) => (
-            <article className="info-card" key={item}>
+            <article className="info-card challenge-card" key={item}>
               <h3>{item}</h3>
-              <p>Описание блока будет перенесено из текущей версии сайта на этапе точного воспроизведения.</p>
+              <p>
+                Описание блока будет перенесено из текущей версии сайта на этапе
+                точного воспроизведения.
+              </p>
             </article>
           ))}
         </div>

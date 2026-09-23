@@ -1,4 +1,10 @@
+"use client";
+
+import { useLanguage } from "@/components/LanguageProvider";
+
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="site-footer">
       <div className="container footer-main">
@@ -18,13 +24,11 @@ export default function Footer() {
       </div>
 
       <div className="container footer-bottom">
-        <span>© {new Date().getFullYear()} DEEP TECH. Все права защищены.</span>
-        <a href="/privacy">Политика конфиденциальности</a>
+        <span>© {new Date().getFullYear()} DEEP TECH. {t.footer.rights}</span>
+        <a href="/privacy">{t.footer.privacy}</a>
       </div>
 
-      <div className="container footer-legal">
-        Все материалы на сайте являются интеллектуальной собственностью. Копирование и использование допускается только с письменного согласия.
-      </div>
+      <div className="container footer-legal">{t.footer.legal}</div>
     </footer>
   );
 }

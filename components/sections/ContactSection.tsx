@@ -3,8 +3,14 @@
 import { FormEvent, useState } from "react";
 import Icon from "@/components/Icon";
 import { useLanguage } from "@/components/LanguageProvider";
+import { PRIVACY_POLICY_URL } from "@/lib/site-links";
 
-const channelValues = ["+79532822222", "@go_to_market_IT", "office@deeptech.family", null] as const;
+const channelValues = [
+  { href: "tel:+74951198081", value: "+7 (495) 119-80-81" },
+  null,
+  { href: "mailto:office@deeptech.family", value: "office@deeptech.family" },
+  { href: "https://wa.me/79532822222", value: "+7 953 282-22-22" },
+] as const;
 const channelIcons = ["phone", "message-circle", "mail", "message-circle"] as const;
 
 export default function ContactSection() {
@@ -57,7 +63,7 @@ export default function ContactSection() {
                 onChange={(event) => setConsent(event.target.checked)}
               />
               <span>
-                {t.contact.consentPrefix} <a href="/privacy">{t.contact.privacy}</a>. {t.contact.consentSuffix}
+                {t.contact.consentPrefix} <a href={PRIVACY_POLICY_URL}>{t.contact.privacy}</a>. {t.contact.consentSuffix}
               </span>
             </label>
 
@@ -68,14 +74,30 @@ export default function ContactSection() {
             {status && <p className="form-status" role="status">{status}</p>}
           </form>
 
-          <div className="channel-grid" aria-label={t.contact.channelsAria}>
-            {t.contact.labels.map((label, index) => (
-              <button className="channel-placeholder" disabled key={label} type="button" title={t.contact.channelTitle}>
-                <Icon name={channelIcons[index]} size={20} />
-                <span>{label}</span>
-                <small>{channelValues[index] ?? t.contact.unavailableChannel}</small>
-              </button>
-            ))}
+          <div className="channel-grid" role="group" aria-label={t.contact.channelsAria}>
+            {t.contact.labels.map((label, index) => {
+              const channel = channelValues[index];
+
+              return (
+                <div className="channel-card" key={label}>
+                  <Icon name={channelIcons[index]} size={20} />
+                  <span>{label}</span>
+                  {channel ? (
+                    <a className="channel-value" href={channel.href}>
+                      <bdi dir="ltr">{channel.value}</bdi>
+                    </a>
+                  ) : (
+                    <div className="channel-values">
+                      {["https://t.me/go_to_market_IT", "https://t.me/Matus_admin"].map((href, telegramIndex) => (
+                        <a href={href} key={href}>
+                          {t.contacts.telegramNames[telegramIndex]}: <bdi dir="ltr">{telegramIndex === 0 ? "@go_to_market_IT" : "@Matus_admin"}</bdi>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
           <p className="entry-note">{t.contact.note}</p>
         </div>

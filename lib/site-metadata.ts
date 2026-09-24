@@ -5,9 +5,9 @@ export type MetadataPage = "home" | "privacy";
 const pageMetadata = {
   ru: {
     home: {
-      title: "DeepTech Family — международные технологические решения",
+      title: "DeepTech Family — коммерциализация Deep Tech",
       description:
-        "Международные решения для развития технологических проектов, сотрудничества и выхода на рынки.",
+        "Платформа для коммерциализации Deep Tech: корпоративные запросы и due diligence, пилоты, промышленное масштабирование, международные партнёрства и Go-To-Market.",
       locale: "ru_RU",
     },
     privacy: {
@@ -19,9 +19,9 @@ const pageMetadata = {
   },
   en: {
     home: {
-      title: "DeepTech Family — international technology solutions",
+      title: "DeepTech Family — Deep Tech commercialization",
       description:
-        "International solutions for technology projects, collaboration and entry into global markets.",
+        "Infrastructure for corporate requests and due diligence, technology pilots, industrial scaling, international partnerships and go-to-market.",
       locale: "en_US",
     },
     privacy: {
@@ -33,9 +33,9 @@ const pageMetadata = {
   },
   es: {
     home: {
-      title: "DeepTech Family — soluciones tecnológicas internacionales",
+      title: "DeepTech Family — comercialización de Deep Tech",
       description:
-        "Soluciones internacionales para proyectos tecnológicos, colaboración y acceso a nuevos mercados.",
+        "Infraestructura para solicitudes corporativas y due diligence, pilotos tecnológicos, escalado industrial, alianzas internacionales y go-to-market.",
       locale: "es_ES",
     },
     privacy: {
@@ -47,9 +47,9 @@ const pageMetadata = {
   },
   ar: {
     home: {
-      title: "DeepTech Family — حلول تقنية دولية",
+      title: "DeepTech Family — تحويل تقنيات Deep Tech إلى أعمال",
       description:
-        "حلول دولية لتطوير المشاريع التقنية والتعاون والوصول إلى الأسواق.",
+        "بنية لدعم طلبات الشركات والفحص التقني النافي للجهالة والمشاريع التجريبية والتوسع الصناعي والشراكات الدولية والوصول إلى السوق.",
       locale: "ar_AR",
     },
     privacy: {
@@ -61,8 +61,8 @@ const pageMetadata = {
   },
   zh: {
     home: {
-      title: "DeepTech Family — 国际科技解决方案",
-      description: "面向科技项目、合作与市场拓展的国际解决方案。",
+      title: "DeepTech Family — 深科技商业化",
+      description: "为企业需求与技术尽调、技术试点、工业规模化、国际合作及 Go-To-Market 提供基础设施。",
       locale: "zh_CN",
     },
     privacy: {

@@ -115,7 +115,7 @@ const translations = {
       lead: "Операционная система международного технологического партнёрства — инфраструктура для пилотов, рынков и промышленного масштабирования DEEP TECH решений.",
       labels: ["Email", "Telegram", "Телефон", "Международное сотрудничество"],
       notes: ["Ответ в течение 24 ч", "Оперативный канал", "Консультация специалиста", "Партнёрства и масштабирование"],
-      telegramNames: ["Telegram Александра", "Telegram администратора"],
+      telegramNames: ["Telegram Александра", "Контакт в Telegram"],
       partnership: "Технологические партнёрства",
     },
     footer: {
@@ -245,7 +245,7 @@ const translations = {
       lead: "An operating system for international technology partnerships — infrastructure for pilots, markets and industrial scaling of DEEP TECH solutions.",
       labels: ["Email", "Telegram", "Phone", "International cooperation"],
       notes: ["Reply within 24 hours", "Fast communication channel", "Specialist consultation", "Partnerships and scaling"],
-      telegramNames: ["Alexander's Telegram", "Site admin's Telegram"],
+      telegramNames: ["Alexander's Telegram", "Telegram contact"],
       partnership: "Technology partnerships",
     },
     footer: {
@@ -370,7 +370,7 @@ const translations = {
       lead: "Plataforma operativa para alianzas tecnológicas internacionales: infraestructura para pilotos, mercados y expansión industrial de soluciones DEEP TECH.",
       labels: ["Correo electrónico", "Telegram", "Teléfono", "Cooperación internacional"],
       notes: ["Respuesta en 24 horas", "Canal de comunicación directo", "Consulta con un especialista", "Alianzas y expansión"],
-      telegramNames: ["Telegram de Alexander", "Telegram del administrador"],
+      telegramNames: ["Telegram de Alexander", "Contacto por Telegram"],
       partnership: "Alianzas tecnológicas",
     },
     footer: {
@@ -493,7 +493,7 @@ const translations = {
       lead: "منظومة تشغيلية للشراكات التقنية الدولية، توفر بنية للمشاريع التجريبية والأسواق والتوسع الصناعي لحلول DEEP TECH.",
       labels: ["البريد الإلكتروني", "تيليغرام", "الهاتف", "التعاون الدولي"],
       notes: ["الرد خلال 24 ساعة", "قناة تواصل مباشرة", "استشارة متخصص", "شراكات وتوسع"],
-      telegramNames: ["تيليغرام ألكسندر", "تيليغرام مسؤول الموقع"],
+      telegramNames: ["تيليغرام ألكسندر", "جهة اتصال عبر تيليغرام"],
       partnership: "شراكات تقنية",
     },
     footer: {
@@ -616,7 +616,7 @@ const translations = {
       lead: "国际科技合作运营平台，为试点、市场拓展和 DEEP TECH 解决方案的产业化提供基础设施。",
       labels: ["电子邮箱", "Telegram", "电话", "国际合作"],
       notes: ["24 小时内回复", "直接沟通渠道", "专家咨询", "合作与规模化"],
-      telegramNames: ["Alexander 的 Telegram", "网站管理员的 Telegram"],
+      telegramNames: ["Alexander 的 Telegram", "Telegram 联系方式"],
       partnership: "科技合作",
     },
     footer: {

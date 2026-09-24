@@ -421,6 +421,13 @@ main, .site-footer { position: relative; z-index: 1; }
 }
 
 @media (min-width: 1600px) {
+  .site-header .header-inner {
+    width: 100%;
+    justify-content: space-between;
+    padding-right: 128px;
+    padding-left: 128px;
+  }
+  .site-header .desktop-nav { flex: 0 0 auto; margin-inline-start: 80px; }
   .hero { min-height: 1091px; padding-top: 220px; }
   .hero-sub { margin-bottom: 50px; }
 }

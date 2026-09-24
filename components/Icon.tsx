@@ -62,6 +62,7 @@ export default function Icon({ name, size = 24, className = "" }: { name: IconNa
     <svg
       aria-hidden="true"
       className={className}
+      data-icon={name}
       fill="none"
       height={size}
       stroke="currentColor"

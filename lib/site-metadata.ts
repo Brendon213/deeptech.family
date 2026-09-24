@@ -31,6 +31,46 @@ const pageMetadata = {
       locale: "en_US",
     },
   },
+  es: {
+    home: {
+      title: "DeepTech Family — soluciones tecnológicas internacionales",
+      description:
+        "Soluciones internacionales para proyectos tecnológicos, colaboración y acceso a nuevos mercados.",
+      locale: "es_ES",
+    },
+    privacy: {
+      title: "Política de privacidad | DeepTech Family",
+      description:
+        "La política de privacidad aprobada se publicará cuando la proporcione el propietario del sitio.",
+      locale: "es_ES",
+    },
+  },
+  ar: {
+    home: {
+      title: "DeepTech Family — حلول تقنية دولية",
+      description:
+        "حلول دولية لتطوير المشاريع التقنية والتعاون والوصول إلى الأسواق.",
+      locale: "ar_AR",
+    },
+    privacy: {
+      title: "سياسة الخصوصية | DeepTech Family",
+      description:
+        "سيُنشر نص سياسة الخصوصية المعتمد بعد تقديمه من مالك الموقع.",
+      locale: "ar_AR",
+    },
+  },
+  zh: {
+    home: {
+      title: "DeepTech Family — 国际科技解决方案",
+      description: "面向科技项目、合作与市场拓展的国际解决方案。",
+      locale: "zh_CN",
+    },
+    privacy: {
+      title: "隐私政策 | DeepTech Family",
+      description: "网站所有者提供经批准的隐私政策后，我们将发布该文本。",
+      locale: "zh_CN",
+    },
+  },
 } as const;
 
 export function getPageMetadata(language: Language, page: MetadataPage) {

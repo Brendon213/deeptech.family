@@ -33,6 +33,9 @@ export default function Header() {
               {t.header.nav[index]}
             </a>
           ))}
+          <button className="login-button mobile-nav-cta" type="button" disabled aria-disabled="true" title={t.header.login}>
+            {t.header.login}
+          </button>
         </nav>
 
         <div className="header-actions">

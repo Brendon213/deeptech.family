@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import localFont from "next/font/local";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import MetadataSynchronizer from "@/components/MetadataSynchronizer";
+import ScrollReveal from "@/components/ScrollReveal";
 import { getPageMetadata } from "@/lib/site-metadata";
 import { LANGUAGE_COOKIE, parseLanguage } from "@/lib/site-preferences";
 import "./globals.css";
@@ -63,10 +64,11 @@ export default async function RootLayout({
   const language = parseLanguage(cookieStore.get(LANGUAGE_COOKIE)?.value);
 
   return (
-    <html lang={language}>
+    <html lang={language} dir={language === "ar" ? "rtl" : "ltr"}>
       <body className={inter.className}>
         <LanguageProvider initialLanguage={language}>
           <MetadataSynchronizer />
+          <ScrollReveal />
           {children}
         </LanguageProvider>
       </body>

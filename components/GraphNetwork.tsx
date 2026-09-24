@@ -6,8 +6,8 @@ type Point = {
   x: number;
   y: number;
   phase: number;
-  driftX: number;
-  driftY: number;
+  velocityX: number;
+  velocityY: number;
   offsetX: number;
   offsetY: number;
 };
@@ -19,8 +19,9 @@ type PointerState = {
 };
 
 const CYAN = "0, 212, 255";
-const MAGNET_RADIUS = 215;
-const CLUSTER_LINK_DISTANCE = 155;
+const MAGNET_RADIUS = 230;
+const BASE_LINK_DISTANCE = 175;
+const CLUSTER_LINK_DISTANCE = 128;
 
 export default function GraphNetwork() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,7 +30,7 @@ export default function GraphNetwork() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext("2d", { alpha: true });
     if (!context) return;
 
     let animationFrame = 0;
@@ -37,6 +38,11 @@ export default function GraphNetwork() {
     let links: Array<[number, number]> = [];
     let width = 0;
     let height = 0;
+    let documentHeight = 0;
+    let pixelRatio = 1;
+    let lastFrame = 0;
+    let lastLinkUpdate = 0;
+    let seed = 0x6d2b79f5;
 
     const pointer: PointerState = {
       clientX: 0,
@@ -48,100 +54,111 @@ export default function GraphNetwork() {
       "(prefers-reduced-motion: reduce)",
     );
 
-    const resize = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      width = window.innerWidth;
-      height = Math.max(window.innerHeight, document.documentElement.scrollHeight);
-
-      canvas.width = Math.round(width * ratio);
-      canvas.height = Math.round(height * ratio);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      context.setTransform(ratio, 0, 0, ratio, 0, 0);
-
-      let seed = 0x6d2b79f5;
-      const random = () => {
-        seed = (seed * 1664525 + 1013904223) >>> 0;
-        return seed / 4294967296;
-      };
-
-      const count = Math.min(
-        240,
-        Math.max(84, Math.floor((width * height) / 34000)),
-      );
-
-      points = Array.from({ length: count }, () => ({
-        x: random() * width,
-        y: random() * height,
-        phase: random() * Math.PI * 2,
-        driftX: 2 + random() * 3.5,
-        driftY: 2 + random() * 3.5,
-        offsetX: 0,
-        offsetY: 0,
-      }));
-
-      const maxLinkDistance = Math.max(145, Math.min(245, width * 0.23));
-      const connected = new Set<string>();
-      links = [];
-
-      points.forEach((point, index) => {
-        points
-          .map((candidate, candidateIndex) => ({
-            candidateIndex,
-            distance: Math.hypot(point.x - candidate.x, point.y - candidate.y),
-          }))
-          .filter(({ candidateIndex }) => candidateIndex !== index)
-          .sort((a, b) => a.distance - b.distance)
-          .slice(0, 2)
-          .forEach(({ candidateIndex, distance }) => {
-            if (distance > maxLinkDistance) return;
-
-            const key = `${Math.min(index, candidateIndex)}:${Math.max(
-              index,
-              candidateIndex,
-            )}`;
-
-            if (connected.has(key)) return;
-            connected.add(key);
-            links.push([index, candidateIndex]);
-          });
-      });
+    const random = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
     };
 
-    const getPositions = (time: number) => {
+    const pointCount = () =>
+      Math.min(
+        520,
+        Math.max(140, Math.floor((width * documentHeight) / 28000)),
+      );
+
+    const createPoint = (): Point => ({
+      x: random() * width,
+      y: random() * documentHeight,
+      phase: random() * Math.PI * 2,
+      velocityX: (random() - 0.5) * 0.34,
+      velocityY: (random() - 0.5) * 0.34,
+      offsetX: 0,
+      offsetY: 0,
+    });
+
+    const resize = () => {
+      const nextWidth = window.innerWidth;
+      const nextHeight = window.innerHeight;
+      const nextDocumentHeight = Math.max(
+        nextHeight,
+        document.documentElement.scrollHeight,
+      );
+      const widthChanged = width !== nextWidth;
+
+      width = nextWidth;
+      height = nextHeight;
+      documentHeight = nextDocumentHeight;
+      pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+      if (widthChanged || points.length === 0) {
+        seed = (0x6d2b79f5 ^ Math.round(width * 13 + documentHeight)) >>> 0;
+        points = Array.from({ length: pointCount() }, createPoint);
+      } else {
+        const count = pointCount();
+        if (points.length > count) points.length = count;
+        while (points.length < count) points.push(createPoint());
+        points.forEach((point) => {
+          point.y = Math.min(point.y, documentHeight);
+        });
+      }
+
+      links = [];
+      lastLinkUpdate = 0;
+
+      if (prefersReducedMotion.matches) draw(performance.now(), false);
+    };
+
+    const getPositions = (time: number, frameScale: number, animate: boolean) => {
       const pointerX = pointer.clientX;
       const pointerY = pointer.clientY + window.scrollY;
 
       return points.map((point) => {
-        const baseX =
-          point.x + Math.sin(time * 0.00022 + point.phase) * point.driftX;
-        const baseY =
-          point.y +
-          Math.cos(time * 0.00018 + point.phase * 1.13) * point.driftY;
+        if (animate) {
+          point.velocityX += Math.sin(time * 0.000075 + point.phase) * 0.0012 * frameScale;
+          point.velocityY += Math.cos(time * 0.000068 + point.phase * 1.17) * 0.0012 * frameScale;
+          point.velocityX = Math.max(-0.34, Math.min(0.34, point.velocityX));
+          point.velocityY = Math.max(-0.34, Math.min(0.34, point.velocityY));
+          point.x += point.velocityX * frameScale;
+          point.y += point.velocityY * frameScale;
+
+          if (point.x < 0 || point.x > width) {
+            point.velocityX *= -1;
+            point.x = Math.max(0, Math.min(width, point.x));
+          }
+          if (point.y < 0 || point.y > documentHeight) {
+            point.velocityY *= -1;
+            point.y = Math.max(0, Math.min(documentHeight, point.y));
+          }
+        }
 
         let targetOffsetX = 0;
         let targetOffsetY = 0;
 
         if (pointer.active) {
-          const dx = pointerX - baseX;
-          const dy = pointerY - baseY;
+          const dx = pointerX - point.x;
+          const dy = pointerY - point.y;
           const distance = Math.hypot(dx, dy);
 
           if (distance < MAGNET_RADIUS) {
             const strength = 1 - distance / MAGNET_RADIUS;
-            const pull = Math.pow(strength, 1.7) * 0.72;
+            const pull = Math.pow(strength, 1.65) * 0.66;
             targetOffsetX = dx * pull;
             targetOffsetY = dy * pull;
           }
         }
 
-        const easing = prefersReducedMotion.matches ? 1 : 0.105;
+        const easing = prefersReducedMotion.matches ? 1 : 0.095 * frameScale;
         point.offsetX += (targetOffsetX - point.offsetX) * easing;
         point.offsetY += (targetOffsetY - point.offsetY) * easing;
 
         return {
-          x: baseX + point.offsetX,
-          y: baseY + point.offsetY,
+          x: point.x + point.offsetX,
+          y: point.y + point.offsetY,
         };
       });
     };
@@ -162,30 +179,70 @@ export default function GraphNetwork() {
       context.stroke();
     };
 
-    const draw = (time: number) => {
-      context.clearRect(0, 0, width, height);
+    const refreshLinks = (positions: Array<{ x: number; y: number }>) => {
+      const counts = new Uint8Array(positions.length);
+      links = [];
 
-      const positions = getPositions(time);
+      for (let first = 0; first < positions.length; first += 1) {
+        if (counts[first] >= 1) continue;
+
+        for (let second = first + 1; second < positions.length; second += 1) {
+          if (counts[second] >= 1) continue;
+
+          const distance = Math.hypot(
+            positions[first].x - positions[second].x,
+            positions[first].y - positions[second].y,
+          );
+
+          if (distance > BASE_LINK_DISTANCE) continue;
+          links.push([first, second]);
+          counts[first] += 1;
+          counts[second] += 1;
+          if (counts[first] >= 1) break;
+        }
+      }
+    };
+
+    const draw = (time: number, animate = !prefersReducedMotion.matches) => {
+      const frameScale = lastFrame
+        ? Math.min(2.5, Math.max(0.4, (time - lastFrame) / (1000 / 60)))
+        : 1;
+      lastFrame = time;
+
+      context.clearRect(0, 0, width, height);
+      const positions = getPositions(time, frameScale, animate);
       const pointerX = pointer.clientX;
       const pointerY = pointer.clientY + window.scrollY;
+
+      if (time - lastLinkUpdate > 460 || links.length === 0) {
+        refreshLinks(positions);
+        lastLinkUpdate = time;
+      }
+
+      context.save();
+      context.translate(0, -window.scrollY);
 
       links.forEach(([from, to]) => {
         const start = positions[from];
         const end = positions[to];
+        const visible =
+          (start.y > window.scrollY - BASE_LINK_DISTANCE &&
+            start.y < window.scrollY + height + BASE_LINK_DISTANCE) ||
+          (end.y > window.scrollY - BASE_LINK_DISTANCE &&
+            end.y < window.scrollY + height + BASE_LINK_DISTANCE);
+        if (!visible) return;
 
-        const startDistance = Math.hypot(start.x - pointerX, start.y - pointerY);
-        const endDistance = Math.hypot(end.x - pointerX, end.y - pointerY);
         const activeLink =
           pointer.active &&
-          startDistance < MAGNET_RADIUS &&
-          endDistance < MAGNET_RADIUS;
+          Math.hypot(start.x - pointerX, start.y - pointerY) < MAGNET_RADIUS &&
+          Math.hypot(end.x - pointerX, end.y - pointerY) < MAGNET_RADIUS;
 
         drawLine(
           start.x,
           start.y,
           end.x,
           end.y,
-          activeLink ? 0.2 : 0.036,
+          activeLink ? 0.2 : 0.035,
           activeLink ? 1.05 : 0.7,
         );
       });
@@ -204,30 +261,22 @@ export default function GraphNetwork() {
             .sort((a, b) => a.pointerDistance - b.pointerDistance)
         : [];
 
-      for (let first = 0; first < nearby.length; first += 1) {
-        for (let second = first + 1; second < nearby.length; second += 1) {
-          const a = nearby[first];
-          const b = nearby[second];
+      const cluster = nearby.slice(0, 9);
+      for (let first = 0; first < cluster.length; first += 1) {
+        for (let second = first + 1; second < cluster.length; second += 1) {
+          const a = cluster[first];
+          const b = cluster[second];
           const distance = Math.hypot(a.x - b.x, a.y - b.y);
-
           if (distance > CLUSTER_LINK_DISTANCE) continue;
 
           const strength = 1 - distance / CLUSTER_LINK_DISTANCE;
-          const pointerStrength =
-            1 -
-            Math.min(
-              MAGNET_RADIUS,
-              (a.pointerDistance + b.pointerDistance) / 2,
-            ) /
-              MAGNET_RADIUS;
-
           drawLine(
             a.x,
             a.y,
             b.x,
             b.y,
-            0.08 + strength * 0.26 + pointerStrength * 0.16,
-            0.75 + pointerStrength * 0.45,
+            0.08 + strength * 0.25,
+            0.75 + strength * 0.45,
           );
         }
       }
@@ -239,44 +288,41 @@ export default function GraphNetwork() {
           pointerY,
           point.x,
           point.y,
-          0.05 + strength * 0.34,
-          0.7 + strength * 0.45,
+          0.05 + strength * 0.3,
+          0.7 + strength * 0.4,
         );
       });
 
       positions.forEach(({ x, y }, index) => {
+        if (y < window.scrollY - 10 || y > window.scrollY + height + 10) return;
+
         const distanceToPointer = pointer.active
           ? Math.hypot(x - pointerX, y - pointerY)
           : Infinity;
         const nearPointer = distanceToPointer < MAGNET_RADIUS;
-        const major = index % 9 === 0;
+        const major = index % 13 === 0;
         const pointerStrength = nearPointer
           ? 1 - distanceToPointer / MAGNET_RADIUS
           : 0;
 
         context.save();
-
         if (major || nearPointer) {
-          context.shadowColor = `rgba(${CYAN}, ${nearPointer ? 0.9 : 0.5})`;
-          context.shadowBlur = nearPointer
-            ? 10 + pointerStrength * 12
-            : 9;
+          context.shadowColor = `rgba(${CYAN}, ${nearPointer ? 0.9 : 0.58})`;
+          context.shadowBlur = nearPointer ? 11 + pointerStrength * 13 : 10;
         }
-
         context.fillStyle = nearPointer
-          ? `rgba(${CYAN}, ${0.24 + pointerStrength * 0.58})`
+          ? `rgba(${CYAN}, ${0.26 + pointerStrength * 0.58})`
           : major
-            ? `rgba(${CYAN}, 0.34)`
-            : `rgba(${CYAN}, 0.1)`;
-
+            ? `rgba(${CYAN}, 0.42)`
+            : `rgba(${CYAN}, 0.12)`;
         context.beginPath();
         context.arc(
           x,
           y,
           nearPointer
-            ? 1.35 + pointerStrength * 1.55
+            ? 1.4 + pointerStrength * 1.5
             : major
-              ? 2.05
+              ? 2.15
               : 0.95,
           0,
           Math.PI * 2,
@@ -295,48 +341,66 @@ export default function GraphNetwork() {
         context.fill();
         context.restore();
       }
+
+      context.restore();
     };
-
-    const updatePointer = (event: PointerEvent) => {
-      pointer.clientX = event.clientX;
-      pointer.clientY = event.clientY;
-      pointer.active = true;
-
-      if (prefersReducedMotion.matches) {
-        draw(0);
-      }
-    };
-
-    const clearPointer = () => {
-      pointer.active = false;
-
-      if (prefersReducedMotion.matches) {
-        draw(0);
-      }
-    };
-
-    resize();
 
     const render = (time: number) => {
       draw(time);
       animationFrame = window.requestAnimationFrame(render);
     };
 
+    const updatePointer = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
+      pointer.clientX = event.clientX;
+      pointer.clientY = event.clientY;
+      pointer.active = true;
+      if (prefersReducedMotion.matches) draw(performance.now(), false);
+    };
+
+    const clearPointer = () => {
+      pointer.active = false;
+      if (prefersReducedMotion.matches) draw(performance.now(), false);
+    };
+
+    const onScroll = () => {
+      if (prefersReducedMotion.matches) draw(performance.now(), false);
+    };
+
+    const onMotionChange = () => {
+      window.cancelAnimationFrame(animationFrame);
+      if (prefersReducedMotion.matches) {
+        animationFrame = 0;
+        draw(performance.now(), false);
+      } else {
+        lastFrame = 0;
+        animationFrame = window.requestAnimationFrame(render);
+      }
+    };
+
+    resize();
     if (prefersReducedMotion.matches) {
-      draw(0);
+      draw(performance.now(), false);
     } else {
       animationFrame = window.requestAnimationFrame(render);
     }
 
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(document.documentElement);
     window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", updatePointer);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("pointermove", updatePointer, { passive: true });
     document.documentElement.addEventListener("pointerleave", clearPointer);
+    prefersReducedMotion.addEventListener("change", onMotionChange);
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
+      resizeObserver.disconnect();
       window.removeEventListener("resize", resize);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", updatePointer);
       document.documentElement.removeEventListener("pointerleave", clearPointer);
+      prefersReducedMotion.removeEventListener("change", onMotionChange);
     };
   }, []);
 

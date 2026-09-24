@@ -18,6 +18,7 @@ export default function MetadataSynchronizer() {
 
   useEffect(() => {
     document.documentElement.lang = language;
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     document.title = metadata.title;
     updateMeta('meta[name="description"]', metadata.description);
     updateMeta('meta[property="og:title"]', metadata.title);

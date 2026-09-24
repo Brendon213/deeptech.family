@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import localFont from "next/font/local";
+import { LanguageProvider } from "@/components/LanguageProvider";
+import MetadataSynchronizer from "@/components/MetadataSynchronizer";
+import { getPageMetadata } from "@/lib/site-metadata";
+import { LANGUAGE_COOKIE, parseLanguage } from "@/lib/site-preferences";
 import "./globals.css";
 
 const SITE_URL = "https://deeptech.family";
 const SITE_NAME = "DeepTech Family";
-const SITE_TITLE = "DeepTech Family — международные технологические решения";
-const SITE_DESCRIPTION =
-  "Международные решения для развития технологических проектов, сотрудничества и выхода на рынки.";
 
 const inter = localFont({
   src: [
@@ -26,39 +28,48 @@ const inter = localFont({
   preload: false,
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: SITE_TITLE,
-    template: "%s | DeepTech Family",
-  },
-  description: SITE_DESCRIPTION,
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    type: "website",
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    locale: "ru_RU",
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-  },
-  twitter: {
-    card: "summary",
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const cookieStore = await cookies();
+  const language = parseLanguage(cookieStore.get(LANGUAGE_COOKIE)?.value);
+  const page = getPageMetadata(language, "home");
 
-export default function RootLayout({
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: page.title,
+    description: page.description,
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      url: SITE_URL,
+      siteName: SITE_NAME,
+      locale: page.locale,
+      title: page.title,
+      description: page.description,
+    },
+    twitter: {
+      card: "summary",
+      title: page.title,
+      description: page.description,
+    },
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const language = parseLanguage(cookieStore.get(LANGUAGE_COOKIE)?.value);
+
   return (
-    <html lang="ru">
-      <body className={inter.className}>{children}</body>
+    <html lang={language}>
+      <body className={inter.className}>
+        <LanguageProvider initialLanguage={language}>
+          <MetadataSynchronizer />
+          {children}
+        </LanguageProvider>
+      </body>
     </html>
   );
 }

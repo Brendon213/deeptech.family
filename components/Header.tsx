@@ -27,7 +27,7 @@ export default function Header() {
           <span className="brand-wordmark">DEEP <span>TECH</span></span>
         </a>
 
-        <nav className={`desktop-nav ${menuOpen ? "is-open" : ""}`} aria-label="Main navigation">
+        <nav className={`desktop-nav ${menuOpen ? "is-open" : ""}`} aria-label={t.header.navLabel}>
           {navItems.map((item, index) => (
             <a key={item.href} href={item.href} onClick={closeMenu}>
               {t.header.nav[index]}

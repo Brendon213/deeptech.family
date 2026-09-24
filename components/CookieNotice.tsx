@@ -1,13 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import {
+  COOKIE_CHOICE_COOKIE,
+  createPreferenceCookie,
+  type CookieChoice,
+} from "@/lib/site-preferences";
 import { useLanguage } from "@/components/LanguageProvider";
 
-export default function CookieNotice() {
-  const [visible, setVisible] = useState(true);
+export default function CookieNotice({ initialChoice }: { initialChoice: CookieChoice | null }) {
+  const [choice, setChoice] = useState<CookieChoice | null>(initialChoice);
   const { t } = useLanguage();
 
-  if (!visible) return null;
+  const saveChoice = (nextChoice: CookieChoice) => {
+    const secure = window.location.protocol === "https:";
+    document.cookie = createPreferenceCookie(COOKIE_CHOICE_COOKIE, nextChoice, secure);
+    setChoice(nextChoice);
+  };
+
+  if (choice) return null;
 
   return (
     <aside className="cookie-notice" aria-label={t.cookie.aria}>
@@ -16,10 +27,10 @@ export default function CookieNotice() {
         {t.cookie.text} <a href="/privacy">{t.cookie.privacy}</a>.
       </p>
       <div className="cookie-actions">
-        <button className="button primary small" type="button" onClick={() => setVisible(false)}>
+        <button className="button primary small" type="button" onClick={() => saveChoice("accepted")}>
           {t.cookie.accept}
         </button>
-        <button className="button secondary small" type="button" onClick={() => setVisible(false)}>
+        <button className="button secondary small" type="button" onClick={() => saveChoice("rejected")}>
           {t.cookie.reject}
         </button>
       </div>

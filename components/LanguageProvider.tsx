@@ -1,14 +1,20 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createPreferenceCookie,
+  LANGUAGE_COOKIE,
+  type Language,
+} from "@/lib/site-preferences";
 
-export type Language = "ru" | "en";
+export type { Language } from "@/lib/site-preferences";
 
 const translations = {
   ru: {
     languageName: "Русский",
     header: {
       nav: ["Витрина запросов", "Витрина проектов", "Go To Market", "Инфраструктура", "Контакты"],
+      navLabel: "Главная навигация",
       login: "Войти в систему",
       menuOpen: "Открыть меню",
       menuClose: "Закрыть меню",
@@ -126,11 +132,20 @@ const translations = {
       accept: "Принять",
       reject: "Отклонить",
     },
+    privacyPage: {
+      title: "Политика конфиденциальности",
+      pending:
+        "Согласованный текст политики конфиденциальности пока не предоставлен владельцем сайта.",
+      notice:
+        "Страница будет обновлена после получения утверждённой редакции. До этого здесь не публикуются условия обработки данных, не подтверждённые владельцем.",
+      home: "Вернуться на главную",
+    },
   },
   en: {
     languageName: "English",
     header: {
       nav: ["Requests", "Projects", "Go To Market", "Infrastructure", "Contacts"],
+      navLabel: "Main navigation",
       login: "Sign in",
       menuOpen: "Open menu",
       menuClose: "Close menu",
@@ -248,6 +263,14 @@ const translations = {
       accept: "Accept",
       reject: "Reject",
     },
+    privacyPage: {
+      title: "Privacy Policy",
+      pending:
+        "The site owner has not yet provided an approved privacy policy.",
+      notice:
+        "This page will be updated when the approved text is provided. No unverified data-processing terms are published here until then.",
+      home: "Return to home",
+    },
   },
 } as const;
 
@@ -262,8 +285,20 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>("ru");
+export function LanguageProvider({
+  children,
+  initialLanguage,
+}: {
+  children: React.ReactNode;
+  initialLanguage: Language;
+}) {
+  const [language, setLanguageState] = useState<Language>(initialLanguage);
+
+  const setLanguage = useCallback((nextLanguage: Language) => {
+    const secure = window.location.protocol === "https:";
+    document.cookie = createPreferenceCookie(LANGUAGE_COOKIE, nextLanguage, secure);
+    setLanguageState(nextLanguage);
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -279,7 +314,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         { code: "en", label: "EN" },
       ],
     }),
-    [language],
+    [language, setLanguage],
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

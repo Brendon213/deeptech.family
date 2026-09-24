@@ -11,9 +11,12 @@ export default function Ecosystem() {
   return (
     <section className="section" id="projects">
       <div className="container">
-        <div className="section-heading centered">
+        <div className="section-heading">
           <p className="eyebrow">{t.ecosystem.eyebrow}</p>
-          <h2>{t.ecosystem.title}</h2>
+          <h2>
+            {t.ecosystem.titleLead}{" "}
+            <span className="text-gradient">{t.ecosystem.titleAccent}</span>
+          </h2>
           <p className="section-lead">{t.ecosystem.lead}</p>
         </div>
 

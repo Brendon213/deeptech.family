@@ -4,6 +4,7 @@ import Icon from "@/components/Icon";
 import { useLanguage } from "@/components/LanguageProvider";
 
 const icons = ["timer", "trending-down", "circle-dashed", "gauge"] as const;
+const metricIcons = ["building-2", "landmark", "cpu", "chart-column"] as const;
 
 export default function Challenges() {
   const { t } = useLanguage();
@@ -31,6 +32,16 @@ export default function Challenges() {
               <h3>{title}</h3>
               <p>{description}</p>
             </article>
+          ))}
+        </div>
+
+        <div className="hero-stats challenge-stats" aria-label={t.hero.statsLabel}>
+          {t.hero.stats.map(([value, label], index) => (
+            <div className="glass-panel stat-card" key={label}>
+              <Icon name={metricIcons[index]} size={20} className="accent-icon" />
+              <strong>{value}</strong>
+              <span>{label}</span>
+            </div>
           ))}
         </div>
       </div>

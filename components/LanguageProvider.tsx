@@ -70,7 +70,8 @@ const translations = {
     },
     ecosystem: {
       eyebrow: "Модули экосистемы",
-      title: "6 модулей экосистемы",
+      titleLead: "6 модулей",
+      titleAccent: "экосистемы",
       lead: "Полный цикл развития технологических проектов: от идеи до промышленного масштабирования",
       modules: [
         ["Клуб фаундеров", "Стратегия и управление", "Формирование команд, принятие стратегических решений, упаковка проектов, выход к пилотам и промышленным заказчикам."],
@@ -201,7 +202,8 @@ const translations = {
     },
     ecosystem: {
       eyebrow: "Ecosystem modules",
-      title: "6 ecosystem modules",
+      titleLead: "6",
+      titleAccent: "ecosystem modules",
       lead: "A full development cycle for technology projects: from idea to industrial scale",
       modules: [
         ["Founders Club", "Strategy and management", "Team building, strategic decisions, project packaging and access to pilots and industrial customers."],
@@ -327,7 +329,8 @@ const translations = {
     },
     ecosystem: {
       eyebrow: "Módulos del ecosistema",
-      title: "6 módulos del ecosistema",
+      titleLead: "6 módulos del",
+      titleAccent: "ecosistema",
       lead: "Un ciclo completo para desarrollar proyectos tecnológicos: de la idea a la escala industrial",
       modules: [
         ["Club de fundadores", "Estrategia y gestión", "Creación de equipos, decisiones estratégicas, preparación de proyectos y acceso a pilotos y clientes industriales."],
@@ -451,7 +454,8 @@ const translations = {
     },
     ecosystem: {
       eyebrow: "وحدات المنظومة",
-      title: "6 وحدات للمنظومة",
+      titleLead: "6 وحدات",
+      titleAccent: "للمنظومة",
       lead: "دورة متكاملة لتطوير المشاريع التقنية من الفكرة إلى التوسع الصناعي",
       modules: [
         ["نادي المؤسسين", "الاستراتيجية والإدارة", "تكوين الفرق واتخاذ القرارات الاستراتيجية وتجهيز المشاريع والوصول إلى المشاريع التجريبية والعملاء الصناعيين."],
@@ -575,7 +579,8 @@ const translations = {
     },
     ecosystem: {
       eyebrow: "生态系统模块",
-      title: "六大生态模块",
+      titleLead: "六大",
+      titleAccent: "生态模块",
       lead: "覆盖科技项目从构想到产业规模化的完整发展周期",
       modules: [
         ["创始人俱乐部", "战略与管理", "组建团队、制定战略、完善项目，并对接试点机会和产业客户。"],

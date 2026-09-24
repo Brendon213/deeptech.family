@@ -3,8 +3,6 @@
 import Icon from "@/components/Icon";
 import { useLanguage } from "@/components/LanguageProvider";
 
-const statIcons = ["building-2", "landmark", "cpu", "chart-column"] as const;
-
 export default function Hero() {
   const { t } = useLanguage();
 
@@ -19,6 +17,7 @@ export default function Hero() {
 
         <h1>
           <span>{t.hero.titleLead}</span>
+          {" "}
           <br />
           <span className="text-gradient">{t.hero.titleAccent}</span>
         </h1>
@@ -35,15 +34,6 @@ export default function Hero() {
           </a>
         </div>
 
-        <div className="hero-stats" aria-label={t.hero.statsLabel}>
-          {t.hero.stats.map(([value, label], index) => (
-            <div className="glass-panel stat-card" key={label}>
-              <Icon name={statIcons[index]} size={20} className="accent-icon" />
-              <strong>{value}</strong>
-              <span>{label}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );

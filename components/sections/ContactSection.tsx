@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
 import Icon from "@/components/Icon";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PRIVACY_POLICY_URL } from "@/lib/site-links";
@@ -14,18 +14,53 @@ const channelValues = [
 const channelIcons = ["phone", "message-circle", "mail", "message-circle"] as const;
 
 export default function ContactSection() {
+  const [values, setValues] = useState({ name: "", contact: "", message: "" });
   const [consent, setConsent] = useState(false);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const { t } = useLanguage();
+  const isFormComplete = Boolean(values.name.trim() && values.contact.trim() && values.message.trim());
+  const canSubmit = consent && isFormComplete;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const updateField = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.currentTarget;
+    setValues((current) => ({ ...current, [name]: value }));
+    setStatus("idle");
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!consent) {
-      setStatus(t.contact.consentError);
+    if (!canSubmit || status === "submitting") {
       return;
     }
-    setStatus(t.contact.unavailable);
+
+    setStatus("submitting");
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...values, consent }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Contact form submission failed");
+      }
+
+      setValues({ name: "", contact: "", message: "" });
+      setConsent(false);
+      setStatus("success");
+    } catch {
+      setStatus("error");
+    }
   };
+
+  const statusMessage =
+    status === "submitting"
+      ? t.contact.submitPending
+      : status === "success"
+        ? t.contact.submitSuccess
+        : status === "error"
+          ? t.contact.submitError
+          : "";
 
   return (
     <section className="section entry-section" id="entry">
@@ -38,20 +73,46 @@ export default function ContactSection() {
             <p>{t.contact.lead}</p>
           </div>
 
-          <form className="request-form" onSubmit={handleSubmit} noValidate>
+          <form className="request-form" onSubmit={handleSubmit} aria-busy={status === "submitting"}>
             <div className="form-fields">
               <label>
                 {t.contact.name}
-                <input name="name" type="text" placeholder={t.contact.namePlaceholder} autoComplete="name" />
+                <input
+                  name="name"
+                  type="text"
+                  placeholder={t.contact.namePlaceholder}
+                  autoComplete="name"
+                  required
+                  value={values.name}
+                  onChange={updateField}
+                  disabled={status === "submitting"}
+                />
               </label>
               <label>
                 {t.contact.contact}
-                <input name="contact" type="text" placeholder={t.contact.contactPlaceholder} autoComplete="email" />
+                <input
+                  name="contact"
+                  type="text"
+                  placeholder={t.contact.contactPlaceholder}
+                  autoComplete="email"
+                  required
+                  value={values.contact}
+                  onChange={updateField}
+                  disabled={status === "submitting"}
+                />
               </label>
             </div>
             <label>
               {t.contact.task}
-              <textarea name="message" rows={3} placeholder={t.contact.taskPlaceholder} />
+              <textarea
+                name="message"
+                rows={3}
+                placeholder={t.contact.taskPlaceholder}
+                required
+                value={values.message}
+                onChange={updateField}
+                disabled={status === "submitting"}
+              />
             </label>
 
             <label className="consent-row">
@@ -60,18 +121,27 @@ export default function ContactSection() {
                 id="consent"
                 name="consent"
                 type="checkbox"
-                onChange={(event) => setConsent(event.target.checked)}
+                onChange={(event) => {
+                  setConsent(event.target.checked);
+                  setStatus("idle");
+                }}
+                disabled={status === "submitting"}
+                required
               />
               <span>
                 {t.contact.consentPrefix} <a href={PRIVACY_POLICY_URL}>{t.contact.privacy}</a>. {t.contact.consentSuffix}
               </span>
             </label>
 
-            <button className="submit-placeholder" type="submit" disabled={!consent}>
+            <button className="submit-placeholder" type="submit" disabled={!canSubmit || status === "submitting"}>
               {t.contact.submit}
               <Icon name="arrow-down" size={18} />
             </button>
-            {status && <p className="form-status" role="status">{status}</p>}
+            {status !== "idle" && (
+              <p className="form-status" role="status" aria-live="polite">
+                {statusMessage}
+              </p>
+            )}
           </form>
 
           <div className="channel-grid" role="group" aria-label={t.contact.channelsAria}>

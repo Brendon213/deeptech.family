@@ -395,6 +395,7 @@ main, .site-footer { position: relative; z-index: 1; }
 .contact-card { min-height: 188px; padding: 24px; text-align: center; transition: border-color .2s ease, transform .2s ease; }
 .contact-card h3 { margin-top: 16px; font-size: 14px; }
 .contact-card .contact-value { margin-top: 5px; color: var(--accent); font-size: 13px; }
+.contact-card a[href^="mailto:"] { display: inline-block; white-space: nowrap; }
 .contact-value-list { display: grid; gap: 4px; overflow-wrap: anywhere; }
 .contact-value-list a { color: inherit; }
 .contact-card p:last-child { margin-top: 4px; font-size: 11px; }

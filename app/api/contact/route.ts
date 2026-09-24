@@ -11,6 +11,8 @@ const VERCEL_MAX_SUBMISSIONS = 5;
 const SHARED_MAX_SUBMISSIONS = 20;
 const MAX_RATE_LIMIT_BUCKETS = 5_000;
 const RATE_LIMIT_CLEANUP_INTERVAL_MS = 60 * 1_000;
+const PRODUCTION_HOSTS = new Set(["deeptech.family", "www.deeptech.family"]);
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 type RateLimitBucket = { timestamps: number[] };
 const rateLimitBuckets = new Map<string, RateLimitBucket>();
@@ -69,26 +71,66 @@ async function readLimitedBody(request: Request): Promise<{ body: string; tooLar
   }
 }
 
+function getExpectedOrigin(request: Request): string | null {
+  let requestUrl: URL;
+  try {
+    requestUrl = new URL(request.url);
+  } catch {
+    return null;
+  }
+
+  const hostHeader = request.headers.get("host")?.trim();
+  if (!hostHeader || hostHeader.includes(",")) return null;
+
+  let hostUrl: URL;
+  try {
+    hostUrl = new URL(`${requestUrl.protocol}//${hostHeader}`);
+  } catch {
+    return null;
+  }
+  if (hostUrl.pathname !== "/" || hostUrl.search || hostUrl.hash || hostUrl.username || hostUrl.password) return null;
+
+  let protocol: string;
+  if (PRODUCTION_HOSTS.has(hostUrl.hostname.toLowerCase())) {
+    if (hostUrl.port && hostUrl.port !== "443") return null;
+    protocol = "https:";
+  } else if (LOOPBACK_HOSTS.has(hostUrl.hostname.toLowerCase())) {
+    // Next can keep an internal request URL while forwarding the browser's host.
+    // In local development, use the single protocol supplied by the local proxy.
+    const forwardedProtocol = request.headers.get("x-forwarded-proto")?.trim().toLowerCase();
+    if (forwardedProtocol && forwardedProtocol !== "http" && forwardedProtocol !== "https") return null;
+    protocol = forwardedProtocol ? `${forwardedProtocol}:` : requestUrl.protocol;
+  } else {
+    return null;
+  }
+
+  try {
+    return new URL(`${protocol}//${hostUrl.host}`).origin;
+  } catch {
+    return null;
+  }
+}
+
+function matchesExpectedOrigin(value: string, expectedOrigin: string): boolean {
+  try {
+    const candidate = new URL(value);
+    return candidate.origin === expectedOrigin;
+  } catch {
+    return false;
+  }
+}
+
 function isSameOriginRequest(request: Request): boolean {
   if (request.headers.get("sec-fetch-site")?.toLowerCase() === "cross-site") return false;
 
+  const expectedOrigin = getExpectedOrigin(request);
+  if (!expectedOrigin) return false;
+
   const origin = request.headers.get("origin");
-  if (origin) {
-    try {
-      if (new URL(origin).origin !== new URL(request.url).origin) return false;
-    } catch {
-      return false;
-    }
-  }
+  if (origin && !matchesExpectedOrigin(origin, expectedOrigin)) return false;
 
   const referer = request.headers.get("referer");
-  if (!origin && referer) {
-    try {
-      if (new URL(referer).origin !== new URL(request.url).origin) return false;
-    } catch {
-      return false;
-    }
-  }
+  if (!origin && referer && !matchesExpectedOrigin(referer, expectedOrigin)) return false;
 
   return true;
 }

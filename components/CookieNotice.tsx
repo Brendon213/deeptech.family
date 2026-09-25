@@ -7,7 +7,7 @@ import {
   type CookieChoice,
 } from "@/lib/site-preferences";
 import { useLanguage } from "@/components/LanguageProvider";
-import { PRIVACY_POLICY_URL } from "@/lib/site-links";
+import { COOKIE_POLICY_URL } from "@/lib/site-links";
 
 export default function CookieNotice({ initialChoice }: { initialChoice: CookieChoice | null }) {
   const [choice, setChoice] = useState<CookieChoice | null>(initialChoice);
@@ -25,7 +25,7 @@ export default function CookieNotice({ initialChoice }: { initialChoice: CookieC
     <aside className="cookie-notice" aria-label={t.cookie.aria}>
       <h2>{t.cookie.title}</h2>
       <p>
-        {t.cookie.text} <a href={PRIVACY_POLICY_URL}>{t.cookie.privacy}</a>.
+        {t.cookie.text} <a href={COOKIE_POLICY_URL}>{t.cookie.policy}</a>.
       </p>
       <div className="cookie-actions">
         <button className="button primary small" type="button" onClick={() => saveChoice("accepted")}>

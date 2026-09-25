@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/LanguageProvider";
-import { PRIVACY_POLICY_URL } from "@/lib/site-links";
+import { LEGAL_HUB_URL } from "@/lib/site-links";
 
 export default function Footer() {
   const { t } = useLanguage();
@@ -28,7 +28,7 @@ export default function Footer() {
 
       <div className="container footer-bottom">
         <span>© {new Date().getFullYear()} DEEP TECH. {t.footer.rights}</span>
-        <a href={PRIVACY_POLICY_URL}>{t.footer.privacy}</a>
+        <a href={LEGAL_HUB_URL}>{t.footer.privacy}</a>
       </div>
 
       <div className="container footer-legal">{t.footer.legal}</div>

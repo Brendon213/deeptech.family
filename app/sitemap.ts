@@ -9,5 +9,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     alternates: { languages: languageUrls },
   }));
 
-  return [...homePages, { url: `${SITE_URL}/privacypolicy` }];
+  return [
+    ...homePages,
+    { url: `${SITE_URL}/legal.html` },
+    { url: `${SITE_URL}/privacypolicy` },
+  ];
 }

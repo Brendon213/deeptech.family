@@ -5,7 +5,6 @@ import { useEffect } from "react";
 const revealTargets = [
   ".section-heading",
   ".entry-box",
-  ".hero-stats .stat-card",
   ".challenge-card",
   ".module-card",
   ".role-card",

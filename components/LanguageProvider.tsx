@@ -27,13 +27,6 @@ const translations = {
       sub: "Инфраструктура взаимодействия корпораций, стартапов и институтов для пилотов, промышленного внедрения и выхода на международные рынки.",
       start: "Начать проект",
       infrastructure: "Изучить инфраструктуру",
-      statsLabel: "Ключевые показатели",
-      stats: [
-        ["500+", "участников экосистемы"],
-        ["15+", "международных рынков"],
-        ["100+", "пилотных проектов"],
-        ["$50M+", "TVL пайплайна"],
-      ],
     },
     challenges: {
       eyebrow: "Вызовы коммерциализации",
@@ -159,13 +152,6 @@ const translations = {
       sub: "Infrastructure connecting corporations, startups and institutions for pilots, industrial deployment and international market expansion.",
       start: "Start a project",
       infrastructure: "Explore infrastructure",
-      statsLabel: "Key metrics",
-      stats: [
-        ["500+", "ecosystem participants"],
-        ["15+", "international markets"],
-        ["100+", "pilot projects"],
-        ["$50M+", "pipeline TVL"],
-      ],
     },
     challenges: {
       eyebrow: "Commercialization challenges",
@@ -291,8 +277,6 @@ const translations = {
       sub: "Infraestructura que conecta empresas, startups e instituciones para realizar pilotos, desplegar soluciones industriales y acceder a mercados internacionales.",
       start: "Iniciar un proyecto",
       infrastructure: "Explorar la infraestructura",
-      statsLabel: "Indicadores clave",
-      stats: [["500+", "participantes del ecosistema"], ["15+", "mercados internacionales"], ["100+", "proyectos piloto"], ["$50M+", "valor del pipeline"]],
     },
     challenges: {
       eyebrow: "Retos de comercialización",
@@ -416,8 +400,6 @@ const translations = {
       sub: "بنية تربط الشركات الناشئة والمؤسسات لإطلاق المشاريع التجريبية والتطبيق الصناعي والوصول إلى الأسواق الدولية.",
       start: "ابدأ مشروعاً",
       infrastructure: "استكشف البنية التحتية",
-      statsLabel: "المؤشرات الرئيسية",
-      stats: [["500+", "مشارك في المنظومة"], ["15+", "سوقاً دولياً"], ["100+", "مشروعاً تجريبياً"], ["$50M+", "قيمة مسار المشاريع"]],
     },
     challenges: {
       eyebrow: "تحديات التسويق التجاري",
@@ -541,8 +523,6 @@ const translations = {
       sub: "连接企业、初创公司与机构，为试点、产业落地和拓展国际市场提供协作基础设施。",
       start: "启动项目",
       infrastructure: "了解基础设施",
-      statsLabel: "关键指标",
-      stats: [["500+", "生态参与者"], ["15+", "国际市场"], ["100+", "试点项目"], ["$50M+", "项目管线总值"]],
     },
     challenges: {
       eyebrow: "商业化挑战",

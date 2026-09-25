@@ -317,13 +317,8 @@ main, .site-footer { position: relative; z-index: 1; }
 .button.small { min-height: 34px; padding: 0 16px; font-size: 12px; }
 
 .glass-panel { border: 1px solid rgba(30, 58, 95, .62); border-radius: 10px; background: rgba(12, 18, 32, .68); box-shadow: 0 16px 48px rgba(0, 0, 0, .1); backdrop-filter: blur(10px); }
-.hero-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 896px; gap: 16px; }
-.stat-card { min-height: 126px; padding: 20px; transition: border-color .2s ease, transform .2s ease; }
-.challenge-stats { margin-top: 64px; }
-.stat-card:hover, .challenge-card:hover, .module-card:hover, .role-card:hover, .infrastructure-card:hover, .contact-card:hover { border-color: rgba(0, 212, 255, .3); transform: translateY(-2px); }
+.challenge-card:hover, .module-card:hover, .role-card:hover, .infrastructure-card:hover, .contact-card:hover { border-color: rgba(0, 212, 255, .3); transform: translateY(-2px); }
 .accent-icon { color: var(--accent); }
-.stat-card strong { display: block; margin-top: 12px; color: var(--text); font-size: 26px; line-height: 1; }
-.stat-card span { display: block; margin-top: 7px; color: var(--muted); font-size: 12px; }
 
 .section { position: relative; padding: 128px 0; }
 .section-heading { margin-bottom: 56px; }
@@ -501,7 +496,6 @@ main, .site-footer { position: relative; z-index: 1; }
   .container { padding-right: 32px; padding-left: 32px; }
   .hero { min-height: 760px; }
   .hero h1 { font-size: clamp(48px, 8vw, 68px); }
-  .hero-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .module-grid, .role-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .infrastructure-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .contacts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -524,7 +518,7 @@ main, .site-footer { position: relative; z-index: 1; }
   .hero-sub { margin-bottom: 28px; font-size: 17px; }
   .hero-cta { align-items: flex-start; flex-direction: column; margin-bottom: 40px; }
   .button { width: auto; }
-  .hero-stats, .challenge-grid, .form-fields, .channel-grid, .module-grid, .role-grid, .infrastructure-grid, .contacts-grid { grid-template-columns: 1fr; }
+  .challenge-grid, .form-fields, .channel-grid, .module-grid, .role-grid, .infrastructure-grid, .contacts-grid { grid-template-columns: 1fr; }
   .section { padding: 84px 0; }
   .section-heading { margin-bottom: 36px; }
   .section h2 { font-size: 36px; letter-spacing: -.8px; }

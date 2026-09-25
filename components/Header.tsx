@@ -48,35 +48,41 @@ export default function Header() {
               type="button"
               aria-label={`${t.header.currentLanguage}: ${t.languageName}`}
               aria-expanded={languageOpen}
+              aria-controls="language-options"
               onClick={() => setLanguageOpen((open) => !open)}
             >
               <Icon name="globe" size={16} />
               <span>{language.toUpperCase()}</span>
             </button>
-            {languageOpen && (
-              <div className="language-menu" role="menu">
+            <nav
+              id="language-options"
+              className="language-menu"
+              aria-label={t.header.languageMenuLabel}
+              hidden={!languageOpen}
+            >
+              <ul className="language-menu-list">
                 {languages.map((item) => (
-                  <a
-                    key={item.code}
-                    className={item.code === language ? "active" : ""}
-                    role="menuitem"
-                    aria-current={item.code === language ? "page" : undefined}
-                    href={getLocalizedPath(pathname, item.code)}
-                    onClick={(event) => {
-                      if (window.location.hash) {
-                        const destination = new URL(event.currentTarget.href);
-                        destination.hash = window.location.hash;
-                        event.currentTarget.href = destination.toString();
-                      }
-                      setLanguageOpen(false);
-                      closeMenu();
-                    }}
-                  >
-                    <span>{item.label}</span>
-                  </a>
+                  <li key={item.code}>
+                    <a
+                      className={item.code === language ? "active" : ""}
+                      aria-current={item.code === language ? "page" : undefined}
+                      href={getLocalizedPath(pathname, item.code)}
+                      onClick={(event) => {
+                        if (window.location.hash) {
+                          const destination = new URL(event.currentTarget.href);
+                          destination.hash = window.location.hash;
+                          event.currentTarget.href = destination.toString();
+                        }
+                        setLanguageOpen(false);
+                        closeMenu();
+                      }}
+                    >
+                      <span>{item.label}</span>
+                    </a>
+                  </li>
                 ))}
-              </div>
-            )}
+              </ul>
+            </nav>
           </div>
 
           <button className="login-button" type="button" disabled aria-disabled="true" title={t.header.login}>

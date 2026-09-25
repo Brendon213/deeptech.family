@@ -15,6 +15,7 @@ const translations = {
       menuOpen: "Открыть меню",
       menuClose: "Закрыть меню",
       currentLanguage: "Текущий язык",
+      languageMenuLabel: "Выбор языка",
     },
     hero: {
       eyebrow: "Операционная система международного технологического партнёрства",
@@ -140,6 +141,7 @@ const translations = {
       menuOpen: "Open menu",
       menuClose: "Close menu",
       currentLanguage: "Current language",
+      languageMenuLabel: "Choose language",
     },
     hero: {
       eyebrow: "Operating system for international technology partnerships",
@@ -265,6 +267,7 @@ const translations = {
       menuOpen: "Abrir menú",
       menuClose: "Cerrar menú",
       currentLanguage: "Idioma actual",
+      languageMenuLabel: "Elegir idioma",
     },
     hero: {
       eyebrow: "Plataforma operativa para alianzas tecnológicas internacionales",
@@ -388,6 +391,7 @@ const translations = {
       menuOpen: "فتح القائمة",
       menuClose: "إغلاق القائمة",
       currentLanguage: "اللغة الحالية",
+      languageMenuLabel: "اختر اللغة",
     },
     hero: {
       eyebrow: "منظومة تشغيلية للشراكات التقنية الدولية",
@@ -511,6 +515,7 @@ const translations = {
       menuOpen: "打开菜单",
       menuClose: "关闭菜单",
       currentLanguage: "当前语言",
+      languageMenuLabel: "选择语言",
     },
     hero: {
       eyebrow: "国际科技合作运营平台",

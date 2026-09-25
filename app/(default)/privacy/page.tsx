@@ -1,9 +1,5 @@
-import type { Metadata } from "next";
-import PrivacyContent from "@/components/PrivacyContent";
-import { getPrivacyMetadata } from "@/lib/seo-metadata";
+import { permanentRedirect } from "next/navigation";
 
-export const metadata: Metadata = getPrivacyMetadata();
-
-export default function PrivacyPage() {
-  return <PrivacyContent />;
+export default function PrivacyRedirect() {
+  permanentRedirect("/privacypolicy");
 }

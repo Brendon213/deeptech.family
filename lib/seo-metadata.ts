@@ -28,28 +28,3 @@ export function getHomeMetadata(language: "ru" | "en" | "es" | "ar" | "zh"): Met
     },
   };
 }
-
-export function getPrivacyMetadata(): Metadata {
-  const page = getPageMetadata("ru", "privacy");
-  const canonical = new URL("/privacy", SITE_URL).toString();
-
-  return {
-    metadataBase: new URL(SITE_URL),
-    title: page.title,
-    description: page.description,
-    alternates: { canonical },
-    robots: { index: false, follow: true },
-    openGraph: {
-      type: "website",
-      url: canonical,
-      siteName: SITE_NAME,
-      title: page.title,
-      description: page.description,
-    },
-    twitter: {
-      card: "summary",
-      title: page.title,
-      description: page.description,
-    },
-  };
-}

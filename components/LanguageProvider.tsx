@@ -123,14 +123,6 @@ const translations = {
       accept: "Принять",
       reject: "Отклонить",
     },
-    privacyPage: {
-      title: "Политика конфиденциальности",
-      pending:
-        "Согласованный текст политики конфиденциальности пока не предоставлен владельцем сайта.",
-      notice:
-        "Страница будет обновлена после получения утверждённой редакции. До этого здесь не публикуются условия обработки данных, не подтверждённые владельцем.",
-      home: "Вернуться на главную",
-    },
   },
   en: {
     languageName: "English",
@@ -248,14 +240,6 @@ const translations = {
       privacy: "Privacy Policy",
       accept: "Accept",
       reject: "Reject",
-    },
-    privacyPage: {
-      title: "Privacy Policy",
-      pending:
-        "The site owner has not yet provided an approved privacy policy.",
-      notice:
-        "This page will be updated when the approved text is provided. No unverified data-processing terms are published here until then.",
-      home: "Return to home",
     },
   },
   es: {
@@ -375,12 +359,6 @@ const translations = {
       accept: "Aceptar",
       reject: "Rechazar",
     },
-    privacyPage: {
-      title: "Política de privacidad",
-      pending: "El propietario del sitio aún no ha proporcionado el texto aprobado de la política de privacidad.",
-      notice: "Esta página se actualizará cuando recibamos la versión aprobada. Hasta entonces no se publicarán condiciones de tratamiento de datos que el propietario no haya confirmado.",
-      home: "Volver al inicio",
-    },
   },
   ar: {
     languageName: "العربية",
@@ -499,12 +477,6 @@ const translations = {
       accept: "موافقة",
       reject: "رفض",
     },
-    privacyPage: {
-      title: "سياسة الخصوصية",
-      pending: "لم يقدّم مالك الموقع بعد النص المعتمد لسياسة الخصوصية.",
-      notice: "سيتم تحديث هذه الصفحة بعد استلام النسخة المعتمدة. وحتى ذلك الحين لن ننشر شروطاً لمعالجة البيانات لم يؤكدها المالك.",
-      home: "العودة إلى الصفحة الرئيسية",
-    },
   },
   zh: {
     languageName: "简体中文",
@@ -622,12 +594,6 @@ const translations = {
       privacy: "隐私政策",
       accept: "接受",
       reject: "拒绝",
-    },
-    privacyPage: {
-      title: "隐私政策",
-      pending: "网站所有者尚未提供经批准的隐私政策文本。",
-      notice: "收到批准版本后，本页面将予以更新。在此之前，我们不会发布未经所有者确认的数据处理条款。",
-      home: "返回首页",
     },
   },
 } as const;

@@ -19,9 +19,13 @@ type PointerState = {
 };
 
 const CYAN = "0, 212, 255";
-const MAGNET_RADIUS = 230;
-const BASE_LINK_DISTANCE = 175;
-const CLUSTER_LINK_DISTANCE = 128;
+const MAGNET_RADIUS = 295;
+const BASE_LINK_DISTANCE = 205;
+const CLUSTER_LINK_DISTANCE = 168;
+const MAX_POINT_LINKS = 2;
+const LINK_REFRESH_INTERVAL = 190;
+const SMALL_SCREEN_FRAME_INTERVAL = 1000 / 30;
+const DESKTOP_FRAME_INTERVAL = 1000 / 45;
 
 export default function GraphNetwork() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,6 +39,7 @@ export default function GraphNetwork() {
 
     let animationFrame = 0;
     let points: Point[] = [];
+    let positions: Array<{ x: number; y: number }> = [];
     let links: Array<[number, number]> = [];
     let width = 0;
     let height = 0;
@@ -59,18 +64,24 @@ export default function GraphNetwork() {
       return seed / 4294967296;
     };
 
-    const pointCount = () =>
-      Math.min(
-        520,
-        Math.max(140, Math.floor((width * documentHeight) / 28000)),
+    const pointCount = () => {
+      const isSmallScreen = width <= 700;
+      const divisor = isSmallScreen ? 25000 : 24000;
+      const minimum = isSmallScreen ? 120 : 190;
+      const maximum = isSmallScreen ? 260 : 600;
+
+      return Math.min(
+        maximum,
+        Math.max(minimum, Math.floor((width * documentHeight) / divisor)),
       );
+    };
 
     const createPoint = (): Point => ({
       x: random() * width,
       y: random() * documentHeight,
       phase: random() * Math.PI * 2,
-      velocityX: (random() - 0.5) * 0.34,
-      velocityY: (random() - 0.5) * 0.34,
+      velocityX: (random() - 0.5) * 1.05,
+      velocityY: (random() - 0.5) * 1.05,
       offsetX: 0,
       offsetY: 0,
     });
@@ -87,7 +98,10 @@ export default function GraphNetwork() {
       width = nextWidth;
       height = nextHeight;
       documentHeight = nextDocumentHeight;
-      pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      pixelRatio = Math.min(
+        window.devicePixelRatio || 1,
+        width <= 700 ? 1.1 : 1.4,
+      );
 
       canvas.width = Math.round(width * pixelRatio);
       canvas.height = Math.round(height * pixelRatio);
@@ -107,6 +121,9 @@ export default function GraphNetwork() {
         });
       }
 
+      if (positions.length > points.length) positions.length = points.length;
+      while (positions.length < points.length) positions.push({ x: 0, y: 0 });
+
       links = [];
       lastLinkUpdate = 0;
 
@@ -117,19 +134,18 @@ export default function GraphNetwork() {
       const pointerX = pointer.clientX;
       const pointerY = pointer.clientY + window.scrollY;
 
-      return points.map((point) => {
+      points.forEach((point, index) => {
         if (animate) {
-          point.velocityX += Math.sin(time * 0.000075 + point.phase) * 0.0012 * frameScale;
-          point.velocityY += Math.cos(time * 0.000068 + point.phase * 1.17) * 0.0012 * frameScale;
-          point.velocityX = Math.max(-0.34, Math.min(0.34, point.velocityX));
-          point.velocityY = Math.max(-0.34, Math.min(0.34, point.velocityY));
+          point.velocityX += Math.sin(time * 0.000075 + point.phase) * 0.0017 * frameScale;
+          point.velocityY += Math.cos(time * 0.000068 + point.phase * 1.17) * 0.0017 * frameScale;
+          point.velocityX = Math.max(-0.82, Math.min(0.82, point.velocityX));
+          point.velocityY = Math.max(-0.82, Math.min(0.82, point.velocityY));
           point.x += point.velocityX * frameScale;
           point.y += point.velocityY * frameScale;
 
-          if (point.x < 0 || point.x > width) {
-            point.velocityX *= -1;
-            point.x = Math.max(0, Math.min(width, point.x));
-          }
+          if (point.x > width) point.x -= width;
+          else if (point.x < 0) point.x += width;
+
           if (point.y < 0 || point.y > documentHeight) {
             point.velocityY *= -1;
             point.y = Math.max(0, Math.min(documentHeight, point.y));
@@ -146,21 +162,21 @@ export default function GraphNetwork() {
 
           if (distance < MAGNET_RADIUS) {
             const strength = 1 - distance / MAGNET_RADIUS;
-            const pull = Math.pow(strength, 1.65) * 0.66;
+            const pull = Math.pow(strength, 1.35) * 0.82;
             targetOffsetX = dx * pull;
             targetOffsetY = dy * pull;
           }
         }
 
-        const easing = prefersReducedMotion.matches ? 1 : 0.095 * frameScale;
+        const easing = prefersReducedMotion.matches ? 1 : 0.15 * frameScale;
         point.offsetX += (targetOffsetX - point.offsetX) * easing;
         point.offsetY += (targetOffsetY - point.offsetY) * easing;
 
-        return {
-          x: point.x + point.offsetX,
-          y: point.y + point.offsetY,
-        };
+        positions[index].x = point.x + point.offsetX;
+        positions[index].y = point.y + point.offsetY;
       });
+
+      return positions;
     };
 
     const drawLine = (
@@ -181,24 +197,50 @@ export default function GraphNetwork() {
 
     const refreshLinks = (positions: Array<{ x: number; y: number }>) => {
       const counts = new Uint8Array(positions.length);
+      const cells = new Map<string, number[]>();
       links = [];
 
+      positions.forEach((position, index) => {
+        const cellX = Math.floor(position.x / BASE_LINK_DISTANCE);
+        const cellY = Math.floor(position.y / BASE_LINK_DISTANCE);
+        const key = `${cellX}:${cellY}`;
+        const members = cells.get(key);
+
+        if (members) members.push(index);
+        else cells.set(key, [index]);
+      });
+
       for (let first = 0; first < positions.length; first += 1) {
-        if (counts[first] >= 1) continue;
+        if (counts[first] >= MAX_POINT_LINKS) continue;
 
-        for (let second = first + 1; second < positions.length; second += 1) {
-          if (counts[second] >= 1) continue;
+        const firstPosition = positions[first];
+        const cellX = Math.floor(firstPosition.x / BASE_LINK_DISTANCE);
+        const cellY = Math.floor(firstPosition.y / BASE_LINK_DISTANCE);
 
-          const distance = Math.hypot(
-            positions[first].x - positions[second].x,
-            positions[first].y - positions[second].y,
-          );
+        for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+          for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+            const nearby = cells.get(`${cellX + offsetX}:${cellY + offsetY}`);
+            if (!nearby) continue;
 
-          if (distance > BASE_LINK_DISTANCE) continue;
-          links.push([first, second]);
-          counts[first] += 1;
-          counts[second] += 1;
-          if (counts[first] >= 1) break;
+            for (const second of nearby) {
+              if (second <= first || counts[second] >= MAX_POINT_LINKS) continue;
+
+              const distance = Math.hypot(
+                firstPosition.x - positions[second].x,
+                firstPosition.y - positions[second].y,
+              );
+
+              if (distance > BASE_LINK_DISTANCE) continue;
+              links.push([first, second]);
+              counts[first] += 1;
+              counts[second] += 1;
+              if (counts[first] >= MAX_POINT_LINKS) break;
+            }
+
+            if (counts[first] >= MAX_POINT_LINKS) break;
+          }
+
+          if (counts[first] >= MAX_POINT_LINKS) break;
         }
       }
     };
@@ -214,7 +256,7 @@ export default function GraphNetwork() {
       const pointerX = pointer.clientX;
       const pointerY = pointer.clientY + window.scrollY;
 
-      if (time - lastLinkUpdate > 460 || links.length === 0) {
+      if (time - lastLinkUpdate > LINK_REFRESH_INTERVAL || links.length === 0) {
         refreshLinks(positions);
         lastLinkUpdate = time;
       }
@@ -242,26 +284,33 @@ export default function GraphNetwork() {
           start.y,
           end.x,
           end.y,
-          activeLink ? 0.2 : 0.035,
-          activeLink ? 1.05 : 0.7,
+          activeLink ? 0.38 : 0.11,
+          activeLink ? 1.15 : 0.8,
         );
       });
 
-      const nearby = pointer.active
-        ? positions
-            .map((position, index) => ({
-              ...position,
-              index,
-              pointerDistance: Math.hypot(
-                position.x - pointerX,
-                position.y - pointerY,
-              ),
-            }))
-            .filter(({ pointerDistance }) => pointerDistance < MAGNET_RADIUS)
-            .sort((a, b) => a.pointerDistance - b.pointerDistance)
-        : [];
+      const nearby: Array<{
+        x: number;
+        y: number;
+        index: number;
+        pointerDistance: number;
+      }> = [];
 
-      const cluster = nearby.slice(0, 9);
+      if (pointer.active) {
+        positions.forEach((position, index) => {
+          const pointerDistance = Math.hypot(
+            position.x - pointerX,
+            position.y - pointerY,
+          );
+
+          if (pointerDistance < MAGNET_RADIUS) {
+            nearby.push({ ...position, index, pointerDistance });
+          }
+        });
+        nearby.sort((a, b) => a.pointerDistance - b.pointerDistance);
+      }
+
+      const cluster = nearby.slice(0, 11);
       for (let first = 0; first < cluster.length; first += 1) {
         for (let second = first + 1; second < cluster.length; second += 1) {
           const a = cluster[first];
@@ -275,21 +324,21 @@ export default function GraphNetwork() {
             a.y,
             b.x,
             b.y,
-            0.08 + strength * 0.25,
-            0.75 + strength * 0.45,
+            0.14 + strength * 0.34,
+            0.85 + strength * 0.5,
           );
         }
       }
 
-      nearby.slice(0, 5).forEach((point) => {
+      nearby.slice(0, 6).forEach((point) => {
         const strength = 1 - point.pointerDistance / MAGNET_RADIUS;
         drawLine(
           pointerX,
           pointerY,
           point.x,
           point.y,
-          0.05 + strength * 0.3,
-          0.7 + strength * 0.4,
+          0.12 + strength * 0.4,
+          0.85 + strength * 0.5,
         );
       });
 
@@ -307,23 +356,23 @@ export default function GraphNetwork() {
 
         context.save();
         if (major || nearPointer) {
-          context.shadowColor = `rgba(${CYAN}, ${nearPointer ? 0.9 : 0.58})`;
-          context.shadowBlur = nearPointer ? 11 + pointerStrength * 13 : 10;
+          context.shadowColor = `rgba(${CYAN}, ${nearPointer ? 0.98 : 0.8})`;
+          context.shadowBlur = nearPointer ? 17 + pointerStrength * 18 : 15;
         }
         context.fillStyle = nearPointer
-          ? `rgba(${CYAN}, ${0.26 + pointerStrength * 0.58})`
+          ? `rgba(${CYAN}, ${0.5 + pointerStrength * 0.45})`
           : major
-            ? `rgba(${CYAN}, 0.42)`
-            : `rgba(${CYAN}, 0.12)`;
+            ? `rgba(${CYAN}, 0.72)`
+            : `rgba(${CYAN}, 0.27)`;
         context.beginPath();
         context.arc(
           x,
           y,
           nearPointer
-            ? 1.4 + pointerStrength * 1.5
+            ? 1.7 + pointerStrength * 1.8
             : major
-              ? 2.15
-              : 0.95,
+              ? 2.5
+              : 1.1,
           0,
           Math.PI * 2,
         );
@@ -333,11 +382,11 @@ export default function GraphNetwork() {
 
       if (pointer.active && nearby.length > 0) {
         context.save();
-        context.shadowColor = `rgba(${CYAN}, 0.75)`;
-        context.shadowBlur = 10;
-        context.fillStyle = `rgba(${CYAN}, 0.32)`;
+        context.shadowColor = `rgba(${CYAN}, 0.9)`;
+        context.shadowBlur = 14;
+        context.fillStyle = `rgba(${CYAN}, 0.5)`;
         context.beginPath();
-        context.arc(pointerX, pointerY, 1.4, 0, Math.PI * 2);
+        context.arc(pointerX, pointerY, 1.7, 0, Math.PI * 2);
         context.fill();
         context.restore();
       }
@@ -346,6 +395,14 @@ export default function GraphNetwork() {
     };
 
     const render = (time: number) => {
+      const frameInterval =
+        width <= 700 ? SMALL_SCREEN_FRAME_INTERVAL : DESKTOP_FRAME_INTERVAL;
+
+      if (lastFrame !== 0 && time - lastFrame < frameInterval) {
+        animationFrame = window.requestAnimationFrame(render);
+        return;
+      }
+
       draw(time);
       animationFrame = window.requestAnimationFrame(render);
     };
@@ -372,16 +429,32 @@ export default function GraphNetwork() {
       if (prefersReducedMotion.matches) {
         animationFrame = 0;
         draw(performance.now(), false);
-      } else {
+      } else if (document.visibilityState !== "hidden") {
         lastFrame = 0;
         animationFrame = window.requestAnimationFrame(render);
+      } else {
+        animationFrame = 0;
       }
+    };
+
+    const onVisibilityChange = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+
+      if (document.visibilityState === "hidden") return;
+      if (prefersReducedMotion.matches) {
+        draw(performance.now(), false);
+        return;
+      }
+
+      lastFrame = 0;
+      animationFrame = window.requestAnimationFrame(render);
     };
 
     resize();
     if (prefersReducedMotion.matches) {
       draw(performance.now(), false);
-    } else {
+    } else if (document.visibilityState !== "hidden") {
       animationFrame = window.requestAnimationFrame(render);
     }
 
@@ -391,6 +464,7 @@ export default function GraphNetwork() {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", updatePointer, { passive: true });
     document.documentElement.addEventListener("pointerleave", clearPointer);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     prefersReducedMotion.addEventListener("change", onMotionChange);
 
     return () => {
@@ -400,6 +474,7 @@ export default function GraphNetwork() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", updatePointer);
       document.documentElement.removeEventListener("pointerleave", clearPointer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       prefersReducedMotion.removeEventListener("change", onMotionChange);
     };
   }, []);

@@ -14,6 +14,15 @@ const RATE_LIMIT_CLEANUP_INTERVAL_MS = 60 * 1_000;
 const PRODUCTION_HOSTS = new Set(["deeptech.family", "www.deeptech.family"]);
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
+function getConfiguredHosts(): Set<string> {
+  return new Set(
+    (process.env.CONTACT_ALLOWED_HOSTS ?? "")
+      .split(",")
+      .map((host) => host.trim().toLowerCase())
+      .filter(Boolean),
+  );
+}
+
 type RateLimitBucket = { timestamps: number[] };
 const rateLimitBuckets = new Map<string, RateLimitBucket>();
 let lastRateLimitCleanup = 0;
@@ -114,7 +123,10 @@ function getExpectedOrigin(request: Request): string | null {
   if (hostUrl.pathname !== "/" || hostUrl.search || hostUrl.hash || hostUrl.username || hostUrl.password) return null;
 
   let protocol: string;
-  if (PRODUCTION_HOSTS.has(hostUrl.hostname.toLowerCase())) {
+  const hostname = hostUrl.hostname.toLowerCase();
+  const configuredHosts = getConfiguredHosts();
+
+  if (PRODUCTION_HOSTS.has(hostname) || configuredHosts.has(hostname)) {
     if (hostUrl.port && hostUrl.port !== "443") return null;
     protocol = "https:";
   } else if (LOOPBACK_HOSTS.has(hostUrl.hostname.toLowerCase())) {

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Icon from "@/components/Icon";
 import { useLanguage } from "@/components/LanguageProvider";
+import { getLocalizedPath } from "@/lib/localized-routes";
 
 const navItems = [
   { href: "#requests" },
@@ -15,7 +17,8 @@ const navItems = [
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
-  const { language, setLanguage, languages, t } = useLanguage();
+  const pathname = usePathname();
+  const { language, languages, t } = useLanguage();
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -53,18 +56,24 @@ export default function Header() {
             {languageOpen && (
               <div className="language-menu" role="menu">
                 {languages.map((item) => (
-                  <button
+                  <a
                     key={item.code}
                     className={item.code === language ? "active" : ""}
-                    type="button"
                     role="menuitem"
-                    onClick={() => {
-                      setLanguage(item.code);
+                    aria-current={item.code === language ? "page" : undefined}
+                    href={getLocalizedPath(pathname, item.code)}
+                    onClick={(event) => {
+                      if (window.location.hash) {
+                        const destination = new URL(event.currentTarget.href);
+                        destination.hash = window.location.hash;
+                        event.currentTarget.href = destination.toString();
+                      }
                       setLanguageOpen(false);
+                      closeMenu();
                     }}
                   >
                     <span>{item.label}</span>
-                  </button>
+                  </a>
                 ))}
               </div>
             )}

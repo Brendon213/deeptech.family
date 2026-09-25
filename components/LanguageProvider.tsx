@@ -1,11 +1,7 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import {
-  createPreferenceCookie,
-  LANGUAGE_COOKIE,
-  type Language,
-} from "@/lib/site-preferences";
+import { createContext, useContext, useMemo } from "react";
+import type { Language } from "@/lib/site-preferences";
 
 export type { Language } from "@/lib/site-preferences";
 
@@ -645,7 +641,6 @@ type Dictionary = WidenStrings<typeof translations.ru>;
 
 type LanguageContextValue = {
   language: Language;
-  setLanguage: (language: Language) => void;
   t: Dictionary;
   languages: Array<{ code: Language; label: string }>;
 };
@@ -659,26 +654,10 @@ export function LanguageProvider({
   children: React.ReactNode;
   initialLanguage: Language;
 }) {
-  const [language, setLanguageState] = useState<Language>(initialLanguage);
-
-  const setLanguage = useCallback((nextLanguage: Language) => {
-    const secure = window.location.protocol === "https:";
-    document.cookie = createPreferenceCookie(LANGUAGE_COOKIE, nextLanguage, secure);
-    document.documentElement.lang = nextLanguage;
-    document.documentElement.dir = nextLanguage === "ar" ? "rtl" : "ltr";
-    setLanguageState(nextLanguage);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.lang = language;
-    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-  }, [language]);
-
   const value = useMemo<LanguageContextValue>(
     () => ({
-      language,
-      setLanguage,
-      t: translations[language],
+      language: initialLanguage,
+      t: translations[initialLanguage],
       languages: [
         { code: "ru", label: "RU" },
         { code: "en", label: "EN" },
@@ -687,7 +666,7 @@ export function LanguageProvider({
         { code: "zh", label: "ZH" },
       ],
     }),
-    [language, setLanguage],
+    [initialLanguage],
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

@@ -26,7 +26,30 @@ type ContactPayload = {
 };
 
 function jsonResponse(body: { ok: boolean; error?: string }, status: number) {
-  return Response.json(body, { status });
+  return Response.json(body, {
+    status,
+    headers: { "X-Robots-Tag": "noindex, nofollow" },
+  });
+}
+
+export function GET() {
+  return new Response(null, {
+    status: 405,
+    headers: {
+      Allow: "POST",
+      "X-Robots-Tag": "noindex, nofollow",
+    },
+  });
+}
+
+export function HEAD() {
+  return new Response(null, {
+    status: 405,
+    headers: {
+      Allow: "POST",
+      "X-Robots-Tag": "noindex, nofollow",
+    },
+  });
 }
 
 async function readLimitedBody(request: Request): Promise<{ body: string; tooLarge: false } | { body: null; tooLarge: true }> {
@@ -247,7 +270,13 @@ export async function POST(request: Request) {
   if (!rateLimit.allowed) {
     return Response.json(
       { ok: false, error: "rate_limited" },
-      { status: 429, headers: { "retry-after": String(rateLimit.retryAfterSeconds) } },
+      {
+        status: 429,
+        headers: {
+          "retry-after": String(rateLimit.retryAfterSeconds),
+          "X-Robots-Tag": "noindex, nofollow",
+        },
+      },
     );
   }
 

@@ -11,6 +11,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { COOKIE_POLICY_URL } from "@/lib/site-links";
 
 const YANDEX_METRIKA_ID = 113082047;
+const GOOGLE_ANALYTICS_ID = "G-SYYL09TB3B";
 
 const YANDEX_METRIKA_SNIPPET = `
 (function(m,e,t,r,i,k,a){
@@ -27,6 +28,13 @@ ym(${YANDEX_METRIKA_ID}, "init", {
 });
 `;
 
+const GOOGLE_ANALYTICS_SNIPPET = `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag("js", new Date());
+gtag("config", "${GOOGLE_ANALYTICS_ID}");
+`;
+
 export default function CookieNotice({ initialChoice }: { initialChoice: CookieChoice | null }) {
   const [choice, setChoice] = useState<CookieChoice | null>(initialChoice);
   const { t } = useLanguage();
@@ -39,9 +47,19 @@ export default function CookieNotice({ initialChoice }: { initialChoice: CookieC
 
   if (choice === "accepted") {
     return (
-      <Script id="yandex-metrika" strategy="afterInteractive">
-        {YANDEX_METRIKA_SNIPPET}
-      </Script>
+      <>
+        <Script id="yandex-metrika" strategy="afterInteractive">
+          {YANDEX_METRIKA_SNIPPET}
+        </Script>
+        <Script
+          id="google-analytics-loader"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {GOOGLE_ANALYTICS_SNIPPET}
+        </Script>
+      </>
     );
   }
 

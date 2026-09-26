@@ -1,5 +1,6 @@
 "use client";
 
+import Script from "next/script";
 import { useState } from "react";
 import {
   COOKIE_CHOICE_COOKIE,
@@ -8,6 +9,23 @@ import {
 } from "@/lib/site-preferences";
 import { useLanguage } from "@/components/LanguageProvider";
 import { COOKIE_POLICY_URL } from "@/lib/site-links";
+
+const YANDEX_METRIKA_ID = 113082047;
+
+const YANDEX_METRIKA_SNIPPET = `
+(function(m,e,t,r,i,k,a){
+  m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+  m[i].l=1*new Date();
+  for (var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}
+  k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+})(window, document, "script", "https://mc.yandex.ru/metrika/tag.js?id=${YANDEX_METRIKA_ID}", "ym");
+
+ym(${YANDEX_METRIKA_ID}, "init", {
+  clickmap: true,
+  trackLinks: true,
+  accurateTrackBounce: true
+});
+`;
 
 export default function CookieNotice({ initialChoice }: { initialChoice: CookieChoice | null }) {
   const [choice, setChoice] = useState<CookieChoice | null>(initialChoice);
@@ -19,7 +37,15 @@ export default function CookieNotice({ initialChoice }: { initialChoice: CookieC
     setChoice(nextChoice);
   };
 
-  if (choice) return null;
+  if (choice === "accepted") {
+    return (
+      <Script id="yandex-metrika" strategy="afterInteractive">
+        {YANDEX_METRIKA_SNIPPET}
+      </Script>
+    );
+  }
+
+  if (choice === "rejected") return null;
 
   return (
     <aside className="cookie-notice" aria-label={t.cookie.aria}>

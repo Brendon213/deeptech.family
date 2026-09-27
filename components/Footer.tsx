@@ -2,15 +2,16 @@
 
 import { useLanguage } from "@/components/LanguageProvider";
 import { LEGAL_HUB_URL } from "@/lib/site-links";
+import { getLocalizedHomePath } from "@/lib/localized-routes";
 
 export default function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <footer className="site-footer">
       <div className="container footer-main">
         <div>
-          <a className="brand footer-brand" href="#top" aria-label="Deep Tech">
+          <a className="brand footer-brand" href={getLocalizedHomePath(language)} aria-label="Deep Tech">
             <span className="brand-mark">DT</span>
             <span className="brand-wordmark">DEEP <span>TECH</span></span>
           </a>

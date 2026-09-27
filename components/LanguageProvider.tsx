@@ -11,6 +11,7 @@ const translations = {
     header: {
       nav: ["Витрина запросов", "Витрина проектов", "Go To Market", "Инфраструктура", "Контакты"],
       navLabel: "Главная навигация",
+      articles: "Статьи",
       login: "Войти в систему",
       menuOpen: "Открыть меню",
       menuClose: "Закрыть меню",
@@ -129,6 +130,7 @@ const translations = {
     header: {
       nav: ["Requests", "Projects", "Go To Market", "Infrastructure", "Contacts"],
       navLabel: "Main navigation",
+      articles: "Articles",
       login: "Sign in",
       menuOpen: "Open menu",
       menuClose: "Close menu",
@@ -247,6 +249,7 @@ const translations = {
     header: {
       nav: ["Solicitudes", "Proyectos", "Go To Market", "Infraestructura", "Contactos"],
       navLabel: "Navegación principal",
+      articles: "Artículos",
       login: "Unirse al sistema",
       menuOpen: "Abrir menú",
       menuClose: "Cerrar menú",
@@ -365,6 +368,7 @@ const translations = {
     header: {
       nav: ["واجهة الطلبات", "واجهة المشاريع", "الوصول إلى السوق", "البنية التحتية", "جهات الاتصال"],
       navLabel: "التنقل الرئيسي",
+      articles: "المقالات",
       login: "الانضمام إلى المنظومة",
       menuOpen: "فتح القائمة",
       menuClose: "إغلاق القائمة",
@@ -483,6 +487,7 @@ const translations = {
     header: {
       nav: ["需求展示", "项目展示", "市场拓展", "基础设施", "联系我们"],
       navLabel: "主导航",
+      articles: "文章",
       login: "加入系统",
       menuOpen: "打开菜单",
       menuClose: "关闭菜单",

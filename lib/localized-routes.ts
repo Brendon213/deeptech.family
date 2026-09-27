@@ -24,6 +24,10 @@ export function getLocalizedPath(pathname: string, language: Language): string {
   return pathWithoutLanguage === "/" ? `/${language}` : `/${language}${pathWithoutLanguage}`;
 }
 
+export function getArticlesPath(language: Language, slug?: string): string {
+  return `${language === "ru" ? "" : `/${language}`}/articles${slug ? `/${slug}` : ""}`;
+}
+
 export function getHomeLanguageUrls(): Record<string, string> {
   return {
     ru: getLocalizedHomeUrl("ru"),

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Icon from "@/components/Icon";
 import { useLanguage } from "@/components/LanguageProvider";
-import { getLocalizedPath } from "@/lib/localized-routes";
+import { getArticlesPath, getLocalizedHomePath, getLocalizedPath } from "@/lib/localized-routes";
+import type { Language } from "@/lib/site-preferences";
 
 const navItems = [
   { href: "#requests" },
@@ -14,29 +15,35 @@ const navItems = [
   { href: "#contacts" },
 ];
 
-export default function Header() {
+export default function Header({ availableArticleLanguages }: { availableArticleLanguages?: Language[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const pathname = usePathname();
   const { language, languages, t } = useLanguage();
+  const home = getLocalizedHomePath(language);
+  const anchor = (hash: string) => pathname === home ? hash : `${home === "/" ? "" : home}/${hash}`;
+  const articleMatch = pathname.match(/^\/(?:en\/|es\/|ar\/|zh\/)?articles\/([^/]+)$/);
 
   const closeMenu = () => setMenuOpen(false);
 
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <a className="brand" href="#top" aria-label="Deep Tech" onClick={closeMenu}>
+        <a className="brand" href={anchor("#top")} aria-label="Deep Tech" onClick={closeMenu}>
           <span className="brand-mark">DT</span>
           <span className="brand-wordmark">DEEP <span>TECH</span></span>
         </a>
 
         <nav className={`desktop-nav ${menuOpen ? "is-open" : ""}`} aria-label={t.header.navLabel}>
           {navItems.map((item, index) => (
-            <a key={item.href} href={item.href} onClick={closeMenu}>
+            <a key={item.href} href={anchor(item.href)} onClick={closeMenu}>
               {t.header.nav[index]}
             </a>
           ))}
-          <a className="login-button mobile-nav-cta" href="#entry" onClick={closeMenu}>
+          <a href={getArticlesPath(language)} onClick={closeMenu} aria-current={pathname === getArticlesPath(language) ? "page" : undefined}>
+            {t.header.articles}
+          </a>
+          <a className="login-button mobile-nav-cta" href={anchor("#entry")} onClick={closeMenu}>
             {t.header.login}
           </a>
         </nav>
@@ -66,9 +73,11 @@ export default function Header() {
                     <a
                       className={item.code === language ? "active" : ""}
                       aria-current={item.code === language ? "page" : undefined}
-                      href={getLocalizedPath(pathname, item.code)}
+                      href={articleMatch
+                        ? getArticlesPath(item.code, availableArticleLanguages?.includes(item.code) ? articleMatch[1] : undefined)
+                        : getLocalizedPath(pathname, item.code)}
                       onClick={(event) => {
-                        if (window.location.hash) {
+                        if (window.location.hash && !articleMatch) {
                           const destination = new URL(event.currentTarget.href);
                           destination.hash = window.location.hash;
                           event.currentTarget.href = destination.toString();
@@ -85,7 +94,7 @@ export default function Header() {
             </nav>
           </div>
 
-          <a className="login-button" href="#entry" onClick={closeMenu}>
+          <a className="login-button" href={anchor("#entry")} onClick={closeMenu}>
             {t.header.login}
           </a>
 

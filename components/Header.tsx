@@ -36,9 +36,9 @@ export default function Header() {
               {t.header.nav[index]}
             </a>
           ))}
-          <button className="login-button mobile-nav-cta" type="button" disabled aria-disabled="true" title={t.header.login}>
+          <a className="login-button mobile-nav-cta" href="#entry" onClick={closeMenu}>
             {t.header.login}
-          </button>
+          </a>
         </nav>
 
         <div className="header-actions">
@@ -85,9 +85,9 @@ export default function Header() {
             </nav>
           </div>
 
-          <button className="login-button" type="button" disabled aria-disabled="true" title={t.header.login}>
+          <a className="login-button" href="#entry" onClick={closeMenu}>
             {t.header.login}
-          </button>
+          </a>
 
           <button
             className="mobile-menu-button"

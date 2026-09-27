@@ -132,7 +132,7 @@ main, .site-footer { position: relative; z-index: 1; }
   font-size: 14px;
 }
 
-.mobile-nav-cta { display: none; }
+.login-button.mobile-nav-cta { display: none; }
 
 .desktop-nav > a { transition: color .2s ease; }
 .desktop-nav > a:hover { color: var(--text); }

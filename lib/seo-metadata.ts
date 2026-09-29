@@ -13,6 +13,7 @@ export function getHomeMetadata(language: "ru" | "en" | "es" | "ar" | "zh"): Met
     metadataBase: new URL(SITE_URL),
     title: page.title,
     description: page.description,
+    verification: { yandex: "7f86ad00bbf4f4e7" },
     alternates: { canonical, languages },
     openGraph: {
       type: "website",
